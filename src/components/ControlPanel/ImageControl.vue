@@ -5,22 +5,43 @@
     </label>
 
     <b-dropdown class="dropdown" v-model="currentLayerIndex" :id="inputId">
-    <button class="button is-primary is-small" slot="trigger">
-      <span>{{ selectedLabel | capitalize }}</span>
-      <b-icon icon="angle-down"></b-icon>
-    </button>
+      <button class="button is-primary is-small" slot="trigger">
+        <span>{{ selectedLabel | capitalize }}</span>
+        <b-icon icon="angle-down"></b-icon>
+      </button>
 
-    <b-dropdown-item
-      v-for="data, idx in layerNames"
-      :key="idx"
-      :value="data.value"
-    >{{ data.label | capitalize }}</b-dropdown-item>
-  </b-dropdown>
+      <b-dropdown-item
+        v-for="data, idx in dropdownData"
+        :key="idx"
+        :value="data.value"
+      >{{ data.label | capitalize }}</b-dropdown-item>
+    </b-dropdown>
+
+    <input type="text" v-model="url">
+    <b-radio v-model="urlType"
+      native-value="image">
+      Image
+    </b-radio>
+    <b-radio v-model="urlType"
+      native-value="video">
+      Video
+    </b-radio>
   </div>
 </template>
 
 <script>
   import { mapGetters } from 'vuex';
+
+  const image = new Image();
+  image.crossOrigin = 'anonymous';
+
+  const video = document.createElement('video');
+  video.crossOrigin = 'anonymous';
+  video.muted = true;
+  video.loop = true;
+  video.addEventListener('canplaythrough', () => {
+    video.play();
+  });
 
   export default {
     name: 'imageControl',
@@ -31,12 +52,17 @@
     data() {
       return {
         currentLayerIndex: -1,
+        url: '',
+        urlType: 'image',
       };
     },
     computed: {
       ...mapGetters('layers', {
         layers: 'allLayers',
       }),
+      ...mapGetters('profiles', [
+        'allProfiles',
+      ]),
       layerNames() {
         const data = [];
         const allLayers = this.layers;
@@ -61,8 +87,29 @@
         return data;
       },
       value() {
-        if (!this.currentLayer) return undefined;
-        return this.currentLayer.canvas;
+        if (typeof this.currentLayerIndex === 'number' && this.currentLayerIndex > -1) {
+          return this.currentLayer.canvas;
+        }
+
+        if (typeof this.currentLayerIndex === 'string') {
+          if (this.currentLayerIndex.indexOf('image:') > -1) {
+            image.src = this.currentLayerIndex.replace('image:', '');
+
+            return image;
+          }
+
+          if (this.currentLayerIndex.indexOf('video:') > -1) {
+            const src = encodeURI(this.currentLayerIndex.replace('video:', ''));
+
+            if (src !== video.src) {
+              video.src = src;
+            }
+
+            return video;
+          }
+        }
+
+        return undefined;
       },
       currentLayer() {
         return this.layers[this.currentLayerIndex];
@@ -80,16 +127,59 @@
         return this.control.label;
       },
       selectedLabel() {
-        return this.currentLayerIndex < 0 ? 'Inherit' : this.layers[this.currentLayerIndex].name;
+        if (!this.currentLayerIndex) return 'Inherit';
+
+        return this.currentLayerIndex < 0 ? 'Inherit' : this.dropdownData.find(datum => datum.value === this.currentLayerIndex).label;
+      },
+      images() {
+        const data = [];
+
+        Object.keys(this.allProfiles).forEach((key) => {
+          const profile = this.allProfiles[key];
+
+          Object.keys(profile.images).forEach((key) => {
+            data.push({
+              label: key,
+              value: `image:${profile.images[key]}`,
+            });
+          });
+        });
+
+        return data;
+      },
+      videos() {
+        const data = [];
+
+        Object.keys(this.allProfiles).forEach((key) => {
+          const profile = this.allProfiles[key];
+
+          Object.keys(profile.videos).forEach((key) => {
+            data.push({
+              label: key,
+              value: `video:${profile.videos[key]}`,
+            });
+          });
+        });
+
+        return data;
+      },
+      dropdownData() {
+        return this.layerNames.concat(this.images).concat(this.videos);
       },
     },
     watch: {
       value() {
         this.module[this.variable] = this.value;
+        this.module[`cache-${this.variable}`] = this.currentLayerIndex;
+      },
+      url(value) {
+        this.currentLayerIndex = `${this.urlType}:${value}`;
       },
     },
     mounted() {
+      this.currentLayerIndex = this.module[`cache-${this.variable}`];
       this.module[this.variable] = this.value;
+      // this.module[this.variable] = this.value;
     },
   };
 </script>

@@ -154,6 +154,14 @@ const mutations = {
     const profile = state.profiles[profileName];
     Vue.set(profile.presets, presetName, presetData);
   },
+  addImageToProfile(state, { profileName, presetName, pathData }) {
+    const profile = state.profiles[profileName];
+    Vue.set(profile.images, presetName, pathData);
+  },
+  addVideoToProfile(state, { profileName, presetName, pathData }) {
+    const profile = state.profiles[profileName];
+    Vue.set(profile.videos, presetName, pathData);
+  },
 };
 
 export default {
