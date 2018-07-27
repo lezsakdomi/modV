@@ -44,6 +44,7 @@ function compileExpression(expression, additionalScope = {}) {
     newFunction = node.compile();
     newFunction.eval(scope);
   } catch (e) {
+    console.error(e);
     return false;
   }
 
@@ -52,12 +53,13 @@ function compileExpression(expression, additionalScope = {}) {
 
 // actions
 const actions = {
-  addExpression({ commit }, { expression, moduleName, controlVariable, scopeAdditions }) {
+  addExpression({ commit }, { expression = 'value', moduleName, controlVariable, scopeAdditions = {} }) {
     const Module = store.getters['modVModules/getActiveModule'](moduleName);
     if (!Module) return;
     if (typeof Module.info.controls[controlVariable] === 'undefined') return;
 
     let additionalScope = {};
+
     const existingModuleAssignment = state.assignments[moduleName];
     if (existingModuleAssignment) {
       if (controlVariable in existingModuleAssignment) {
@@ -65,21 +67,20 @@ const actions = {
       }
     }
 
+    scopeAdditions.map = 'function map(v,ia,iz,oa,oz){return oa+(oz-oa)*((v-ia)/(iz-ia));}'; //eslint-disable-line
+
     if (scopeAdditions) {
       Object.keys(scopeAdditions).forEach((key) => {
         additionalScope[key] = eval(`(${scopeAdditions[key]})`); //eslint-disable-line
       });
     }
 
-    let exp = expression;
-    if (!exp) exp = 'value';
-
-    const func = compileExpression(exp, additionalScope);
+    const func = compileExpression(expression, additionalScope);
     if (!func) return;
 
     const assignment = {
       func,
-      expression: exp,
+      expression,
       additionalScope,
       moduleName,
       controlVariable,
@@ -147,6 +148,15 @@ const mutations = {
   },
   setDelta(state, { delta }) {
     Vue.set(state, 'delta', delta);
+  },
+  renameScopeItem(state, { oldName, newName, moduleName, controlVariable }) {
+    Vue.set(
+      state.assignments[moduleName][controlVariable].additionalScope,
+      newName,
+      state.assignments[moduleName][controlVariable].additionalScope[oldName],
+    );
+
+    Vue.delete(state.assignments[moduleName][controlVariable].additionalScope, 'oldName');
   },
 };
 

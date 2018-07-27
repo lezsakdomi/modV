@@ -4,7 +4,7 @@
       {{ label }}
     </label>
 
-    <b-dropdown class="dropdown" v-model="currentLayerIndex" :id="inputId">
+    <b-dropdown class="dropdown" v-model="dropdownValue" :id="inputId">
       <button class="button is-primary is-small" slot="trigger">
         <span>{{ selectedLabel | capitalize }}</span>
         <b-icon icon="angle-down"></b-icon>
@@ -31,6 +31,7 @@
 
 <script>
   import { mapGetters } from 'vuex';
+  import { modV } from 'modv';
 
   const image = new Image();
   image.crossOrigin = 'anonymous';
@@ -51,7 +52,7 @@
     ],
     data() {
       return {
-        currentLayerIndex: -1,
+        dropdownValue: 'inherit:',
         url: '',
         urlType: 'image',
       };
@@ -71,48 +72,57 @@
 
         data.push({
           label: 'Inherit',
-          value: -1,
-          selected: typeof this.currentLayerIndex === 'undefined',
+          value: 'inherit:',
+          selected: typeof this.dropdownValue === 'undefined',
+        });
+
+        data.push({
+          label: 'Webcam',
+          value: 'webcam:',
+          selected: this.dropdownValue === 'webcam:',
         });
 
         allLayers.forEach((Layer, idx) => {
           const name = Layer.name;
           data.push({
             label: name,
-            value: idx,
-            selected: this.currentLayerIndex === idx,
+            value: `layer:${idx}`,
+            selected: this.dropdownValue === `layer:${idx}`,
           });
         });
 
         return data;
       },
       value() {
-        if (typeof this.currentLayerIndex === 'number' && this.currentLayerIndex > -1) {
-          return this.currentLayer.canvas;
+        if (this.dropdownValue.indexOf('inherit:') > -1) {
+          return undefined;
         }
 
-        if (typeof this.currentLayerIndex === 'string') {
-          if (this.currentLayerIndex.indexOf('image:') > -1) {
-            image.src = this.currentLayerIndex.replace('image:', '');
+        if (this.dropdownValue.indexOf('webcam:') > -1) {
+          return modV.videoStream;
+        }
 
-            return image;
+        if (this.dropdownValue.indexOf('layer:') > -1) {
+          return this.layers[parseInt(this.dropdownValue.replace('layer:', ''), 10)];
+        }
+
+        if (this.dropdownValue.indexOf('image:') > -1) {
+          image.src = this.dropdownValue.replace('image:', '');
+
+          return image;
+        }
+
+        if (this.dropdownValue.indexOf('video:') > -1) {
+          const src = encodeURI(this.dropdownValue.replace('video:', ''));
+
+          if (src !== video.src) {
+            video.src = src;
           }
 
-          if (this.currentLayerIndex.indexOf('video:') > -1) {
-            const src = encodeURI(this.currentLayerIndex.replace('video:', ''));
-
-            if (src !== video.src) {
-              video.src = src;
-            }
-
-            return video;
-          }
+          return video;
         }
 
         return undefined;
-      },
-      currentLayer() {
-        return this.layers[this.currentLayerIndex];
       },
       moduleName() {
         return this.module.info.name;
@@ -127,9 +137,9 @@
         return this.control.label;
       },
       selectedLabel() {
-        if (!this.currentLayerIndex) return 'Inherit';
+        if (!this.dropdownValue) return 'Inherit';
 
-        return this.currentLayerIndex < 0 ? 'Inherit' : this.dropdownData.find(datum => datum.value === this.currentLayerIndex).label;
+        return this.dropdownValue.indexOf('inherit:') > -1 ? 'Inherit' : this.dropdownData.find(datum => datum.value === this.dropdownValue).label;
       },
       images() {
         const data = [];
@@ -170,14 +180,17 @@
     watch: {
       value() {
         this.module[this.variable] = this.value;
-        this.module[`cache-${this.variable}`] = this.currentLayerIndex;
+        this.module[`cache-${this.variable}`] = this.dropdownValue;
       },
       url(value) {
-        this.currentLayerIndex = `${this.urlType}:${value}`;
+        this.dropdownValue = `${this.urlType}:${value}`;
       },
     },
     mounted() {
-      this.currentLayerIndex = this.module[`cache-${this.variable}`];
+      if (this.module[`cache-${this.variable}`]) {
+        this.dropdownValue = this.module[`cache-${this.variable}`];
+      }
+
       this.module[this.variable] = this.value;
       // this.module[this.variable] = this.value;
     },

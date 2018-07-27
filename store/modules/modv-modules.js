@@ -86,7 +86,10 @@ const actions = {
 
       const canvas = modV.bufferCanvas;
 
-      if ('init' in module && !skipInit) module.init(canvas);
+      if ('init' in module && !skipInit) {
+        console.log('init for', module.info.name);
+        module.init(canvas);
+      }
 
       if ('meyda' in module.info) {
         if (Array.isArray(module.info.meyda)) {
@@ -110,6 +113,8 @@ const actions = {
               duration: control.timePeriod,
               moduleName: newModuleName,
               variable: control.variable,
+            }).catch((e) => {
+              console.error(e);
             });
           }
         });
@@ -229,17 +234,17 @@ const actions = {
     let processedValue = value.valueOf();
 
     store.getters['plugins/enabledPlugins']
-    .filter(plugin => ('processValue' in plugin.plugin))
-    .forEach((plugin) => {
-      const newValue = plugin.plugin.processValue({
-        currentValue: processedValue,
-        controlVariable: variable,
-        delta: modV.delta,
-        moduleName,
-      });
+      .filter(plugin => ('processValue' in plugin.plugin))
+      .forEach((plugin) => {
+        const newValue = plugin.plugin.processValue({
+          currentValue: processedValue,
+          controlVariable: variable,
+          delta: modV.delta,
+          moduleName,
+        });
 
-      if (newValue) processedValue = newValue;
-    });
+        if (newValue) processedValue = newValue;
+      });
 
     if (
       Object.keys(controlValues)

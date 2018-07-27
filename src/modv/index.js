@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import EventEmitter2 from 'eventemitter2';
 
 import BeatDetektor from '@/extra/beatdetektor';
 import store from '@/../store/';
@@ -13,14 +12,12 @@ import PaletteWorker from './palette-worker/palette-worker';
 import MediaManagerClient from './MediaManagerClient';
 import installPlugin from './install-plugin';
 
-class ModV extends EventEmitter2 {
+class ModV {
   /**
    * [constructor description]
    * @param  {ModVOptions} options
    */
   constructor() {
-    super();
-
     this.assignmentMax = 1;
 
     this.layers = store.getters['layers/allLayers'];
@@ -65,6 +62,8 @@ class ModV extends EventEmitter2 {
     this.workers = {};
 
     window.addEventListener('unload', () => {
+      cancelAnimationFrame(this.mainRaf);
+
       this.windows.forEach((windowController) => {
         const windowRef = this.windowReference(windowController.window);
         windowRef.close();
@@ -78,7 +77,9 @@ class ModV extends EventEmitter2 {
     this.delta = 0;
   }
 
-  start(Vue) {
+  async start(Vue) {
+    this.workers = this.createWorkers();
+
     const mediaStreamScan = this.mediaStreamScan;
     const setMediaStreamSource = this.setMediaStreamSource;
 
@@ -97,37 +98,32 @@ class ModV extends EventEmitter2 {
 
     store.dispatch('windows/createWindow', { Vue });
 
-    mediaStreamScan().then((mediaStreamDevices) => {
-      mediaStreamDevices.audio.forEach(source => store.commit('mediaStream/addAudioSource', { source }));
-      mediaStreamDevices.video.forEach(source => store.commit('mediaStream/addVideoSource', { source }));
+    const mediaStreamDevices = await mediaStreamScan();
+    mediaStreamDevices.audio.forEach(source => store.commit('mediaStream/addAudioSource', { source }));
+    mediaStreamDevices.video.forEach(source => store.commit('mediaStream/addVideoSource', { source }));
 
-      let audioSourceId;
-      let videoSourceId;
+    let audioSourceId = store.getters['user/currentAudioSource'];
+    let videoSourceId = store.getters['user/setCurrentVideoSource'];
 
-      if (store.getters['user/currentAudioSource']) {
-        audioSourceId = store.getters['user/currentAudioSource'];
-      } else if (mediaStreamDevices.audio.length > 0) {
-        audioSourceId = mediaStreamDevices.audio[0].deviceId;
-      }
+    if (!audioSourceId && mediaStreamDevices.audio.length > 0) {
+      audioSourceId = mediaStreamDevices.audio[0].deviceId;
+    }
 
-      if (store.getters['user/setCurrentVideoSource']) {
-        videoSourceId = store.getters['user/setCurrentVideoSource'];
-      } else if (mediaStreamDevices.video.length > 0) {
-        videoSourceId = mediaStreamDevices.video[0].deviceId;
-      }
+    if (!videoSourceId && mediaStreamDevices.video.length > 0) {
+      videoSourceId = mediaStreamDevices.video[0].deviceId;
+    }
 
-      return {
-        audioSourceId,
-        videoSourceId,
-      };
-    }).then(setMediaStreamSource).then(({ audioSourceId, videoSourceId }) => {
-      store.commit('user/setCurrentAudioSource', { sourceId: audioSourceId });
-      store.commit('user/setCurrentVideoSource', { sourceId: videoSourceId });
-
-      this.mainRaf = requestAnimationFrame(this.loop.bind(this));
+    const sourceIds = await setMediaStreamSource({
+      audioSourceId,
+      videoSourceId,
     });
 
-    this.workers = this.createWorkers();
+    store.dispatch('user/setCurrentAudioSource', { sourceId: sourceIds.audioSourceId });
+    store.dispatch('user/setCurrentVideoSource', { sourceId: sourceIds.videoSourceId });
+
+    this.boundLoop = this.loop.bind(this);
+    this.mainRaf = requestAnimationFrame(this.boundLoop);
+
     this.MediaManagerClient = new MediaManagerClient();
 
     store.dispatch('size/resizePreviewCanvas');
@@ -172,10 +168,8 @@ class ModV extends EventEmitter2 {
     this.kick = this.beatDetektorKick.isKick();
 
     draw(δ).then(() => {
-      this.mainRaf = requestAnimationFrame(this.loop.bind(this));
+      this.mainRaf = requestAnimationFrame(this.boundLoop);
       stats.end();
-    }).then(() => {
-      this.emit('tick', δ);
     });
   }
 

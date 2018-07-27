@@ -1,5 +1,4 @@
 import store from '@/../store';
-import { modV } from '@/modv';
 
 class WindowController {
   constructor(Vue) {
@@ -84,8 +83,12 @@ class WindowController {
 
     let resizeQueue = {};
     let lastArea = 0;
-    // Roughly attach to the main RAF loop for smoother resizing
-    modV.on('tick', () => {
+    let raf;
+    let boundLoop;
+
+    // Attach to an RAF loop for smoother resizing
+    function resizeLoop() {
+      raf = requestAnimationFrame(boundLoop);
       if (lastArea < 1) return;
 
       if ((resizeQueue.width * resizeQueue.height) + resizeQueue.dpr !== lastArea) {
@@ -107,7 +110,9 @@ class WindowController {
       }
 
       lastArea = 0;
-    });
+    }
+
+    boundLoop = resizeLoop.bind(this);
 
     this.resize = (width, height, dpr = 1, emit = true) => {
       resizeQueue = {
@@ -130,8 +135,11 @@ class WindowController {
     });
     windowRef.addEventListener('beforeunload', () => 'You sure about that, you drunken mess?');
     windowRef.addEventListener('unload', () => {
+      cancelAnimationFrame(raf);
       store.dispatch('windows/destroyWindow', { windowRef: this.window });
     });
+
+    raf = requestAnimationFrame(boundLoop);
 
     if (callback) callback(this);
   }

@@ -58,8 +58,8 @@ class ModuleISF extends Module {
   }
 
   init(can) { //eslint-disable-line
-    this.ISFcanvas.width = can.width;
-    this.ISFcanvas.height = can.height;
+    // this.ISFcanvas.width = can.width;
+    // this.ISFcanvas.height = can.height;
 
     let fragmentShader = this.settings.fragmentShader;
     let vertexShader = this.settings.vertexShader;

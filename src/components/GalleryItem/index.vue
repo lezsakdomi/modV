@@ -33,7 +33,7 @@
       return {
         canvas: false,
         context: false,
-        Module: false,
+        Module: undefined,
         raf: false,
         appendToName: '-gallery',
         isIsf: false,
@@ -46,19 +46,16 @@
     mounted() {
       this.canvas = this.$refs.canvas;
       this.context = this.canvas.getContext('2d');
-
+    },
+    created() {
       this.createActiveModule({
         moduleName: this.moduleName,
         appendToName: this.appendToName,
-        skipInit: true,
+        // skipInit: true,
       }).then((Module) => {
         this.Module = Module;
         if (Module instanceof ModuleISF) {
           this.isIsf = true;
-        }
-
-        if ('init' in Module) {
-          Module.init({ width: this.canvas.width, height: this.canvas.height });
         }
       }).catch((e) => {
         console.log(`An error occoured whilst initialising a gallery module - ${this.Module.info.name}`);

@@ -27,7 +27,7 @@
 </template>
 
 <script>
-  import { mapActions, mapGetters } from 'vuex';
+  import { mapActions, mapGetters, mapMutations } from 'vuex';
   import scopeItem from './ScopeItem';
 
   export default {
@@ -67,13 +67,24 @@
       },
     },
     created() {
-      this.expression = this.assignment.expression || 'value';
+      this.expression = this.assignment.expression;
+
+      if (!this.expression) {
+        this.addExpression({
+          moduleName: this.moduleName,
+          controlVariable: this.controlVariable,
+        });
+      }
+
+      this.expression = this.assignment.expression;
     },
     methods: {
+      ...mapMutations('expression', [
+        'renameScopeItem',
+      ]),
       ...mapActions('expression', [
         'addExpression',
         'addToScope',
-        'renameScopeItem',
         'updateScopeItem',
       ]),
       addNewScopeItem() {

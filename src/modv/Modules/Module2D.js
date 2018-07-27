@@ -13,10 +13,11 @@ class Module2D extends Module {
   constructor(settings) {
     super(settings);
 
-    function render({ canvas, context, video, features, meyda, delta, bpm, kick }) {
+    function render({ canvas, context, video, features, meyda, delta, bpm, kick, pipeline }) {
       twoDCanvas.width = canvas.width;
       twoDCanvas.height = canvas.height;
 
+      twoDContext.drawImage(canvas, 0, 0, canvas.width, canvas.height);
       twoDContext.save();
       this.draw({
         canvas: twoDCanvas,
@@ -33,6 +34,7 @@ class Module2D extends Module {
       context.save();
       context.globalAlpha = this.info.alpha || 1;
       context.globalCompositeOperation = this.info.compositeOperation || 'normal';
+      if (pipeline) context.clearRect(0, 0, canvas.width, canvas.height);
       context.drawImage(twoDCanvas, 0, 0, canvas.width, canvas.height);
       context.restore();
     }
