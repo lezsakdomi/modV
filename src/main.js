@@ -6,6 +6,7 @@ import Shortkey from 'vue-shortkey';
 import VueThrottleEvent from 'vue-throttle-event';
 import Buefy from 'buefy';
 import Vuebar from 'vuebar';
+import MoreMath from 'moremath';
 
 import Capitalize from '@/vuePlugins/capitalize-filter';
 
@@ -23,6 +24,8 @@ import shadertoy from './extra/shadertoy';
 import './assets/styles/index.scss';
 
 import attachResizeHandles from './extra/ui-resize/attach';
+
+Math = Object.assign(Math, MoreMath); //eslint-disable-line
 
 Vue.config.productionTip = false;
 
@@ -63,21 +66,18 @@ export default window.modVVue = new Vue({
   mounted() {
     modV.start(this);
 
-    const modules = [
+    [
       'Text',
-    //   'Webcam',
-    //   'Pixelate',
+      'Webcam',
       'Plasma',
       'ChromaticAbberation',
-    //   'Wobble',
-    //   'OpticalFlowDistort',
-    //   'Neon',
-    //   'Fisheye',
-    //   'MirrorEdge',
-    //   'EdgeDistort',
-    //   'Polygon',
-    //   'Concentrics',
-    //   'Phyllotaxis',
+      'Wobble',
+      'Neon',
+      'Fisheye',
+      'MirrorEdge',
+      'EdgeDistort',
+      'Polygon',
+      // 'Phyllotaxis',
       'Pixelate-2.0',
       'Ball-2.0',
       'Concentrics-2.0',
@@ -85,15 +85,15 @@ export default window.modVVue = new Vue({
       'Un-Deux-Trois',
       'OpticalFlowDistort-2.0',
       'MattiasCRT-2.0',
-    ];
-
-    modules.forEach((fileName) => {
+    ].forEach((fileName) => {
       import(`@/modv/sample-modules/${fileName}`).then((Module) => {
         modV.register(Module.default);
+      }).catch((e) => {
+        throw new Error(e);
       });
     });
 
-    const isfSamples = [
+    [
       'film-grain.fs',
       'block-color.fs',
       'plasma.fs',
@@ -142,9 +142,7 @@ export default window.modVVue = new Vue({
       'spherical-shader-tut.fs',
       'scale.fs',
       'LogTransWarpSpiral.fs',
-    ];
-
-    isfSamples.forEach((fileName) => {
+    ].forEach((fileName) => {
       import(`@/modv/sample-modules/isf-samples/${fileName}`).then((fragmentShader) => {
         modV.register({
           meta: {
@@ -153,7 +151,7 @@ export default window.modVVue = new Vue({
             version: '1.0.0',
             type: 'isf',
           },
-          fragmentShader,
+          fragmentShader: fragmentShader.default,
           vertexShader: 'void main() {isf_vertShaderInit();}',
         });
       }).catch((e) => {

@@ -51,85 +51,85 @@
 </template>
 
 <script>
-  import { mapActions, mapGetters, mapMutations } from 'vuex';
+import { mapActions, mapGetters, mapMutations } from 'vuex';
 
-  import ModuleGallery from '@/components/Gallery/ModuleGallery';
-  import PaletteGallery from '@/components/Gallery/PaletteGallery';
-  import PluginGallery from '@/components/Gallery/PluginGallery';
-  import PresetGallery from '@/components/Gallery/PresetGallery';
-  import ProjectGallery from '@/components/Gallery/ProjectGallery';
-  import SearchBar from '@/components/Gallery/SearchBar';
+import ModuleGallery from '@/components/Gallery/ModuleGallery';
+import PaletteGallery from '@/components/Gallery/PaletteGallery';
+import PluginGallery from '@/components/Gallery/PluginGallery';
+import PresetGallery from '@/components/Gallery/PresetGallery';
+import ProjectGallery from '@/components/Gallery/ProjectGallery';
+import SearchBar from '@/components/Gallery/SearchBar';
 
-  export default {
-    name: 'gallery',
-    data() {
-      return {
-        currentActiveDrag: null,
-        phrase: '',
-      };
+export default {
+  name: 'gallery',
+  data() {
+    return {
+      currentActiveDrag: null,
+      phrase: '',
+    };
+  },
+  computed: {
+    ...mapGetters('plugins', {
+      plugins: 'pluginsWithGalleryTab',
+    }),
+    ...mapGetters('modVModules', {
+      currentDragged: 'currentDragged',
+      modules: 'registry',
+    }),
+    enabledPlugins() {
+      return Object.keys(this.plugins)
+        .filter(pluginName => this.plugins[pluginName].enabled)
+        .reduce((obj, pluginName) => {
+          obj[pluginName] = this.plugins[pluginName];
+          return obj;
+        }, {});
     },
-    computed: {
-      ...mapGetters('plugins', {
-        plugins: 'pluginsWithGalleryTab',
-      }),
-      ...mapGetters('modVModules', {
-        currentDragged: 'currentDragged',
-        modules: 'registry',
-      }),
-      enabledPlugins() {
-        return Object.keys(this.plugins)
-          .filter(pluginName => this.plugins[pluginName].enabled)
-          .reduce((obj, pluginName) => {
-            obj[pluginName] = this.plugins[pluginName];
-            return obj;
-          }, {});
-      },
+  },
+  methods: {
+    ...mapActions('modVModules', [
+      'removeActiveModule',
+    ]),
+    ...mapMutations('modVModules', [
+      'setCurrentDragged',
+    ]),
+    ...mapMutations('layers', [
+      'removeModuleFromLayer',
+    ]),
+    menuIconClicked() {
+      this.$emit('menuIconClicked');
     },
-    methods: {
-      ...mapActions('modVModules', [
-        'removeActiveModule',
-      ]),
-      ...mapMutations('modVModules', [
-        'setCurrentDragged',
-      ]),
-      ...mapMutations('layers', [
-        'removeModuleFromLayer',
-      ]),
-      menuIconClicked() {
-        this.$emit('menuIconClicked');
-      },
-      drop(e) {
-        e.preventDefault();
-        const moduleName = e.dataTransfer.getData('module-name');
-        const layerIndex = e.dataTransfer.getData('layer-index');
+    drop(e) {
+      e.preventDefault();
+      const moduleName = e.dataTransfer.getData('module-name');
+      const layerIndex = e.dataTransfer.getData('layer-index');
 
-        this.removeModuleFromLayer({ moduleName, layerIndex });
-        this.removeActiveModule({ moduleName });
+      this.removeModuleFromLayer({ moduleName, layerIndex });
+      this.removeActiveModule({ moduleName });
 
-        this.setCurrentDragged({ moduleName: null });
-      },
-      dragover(e) {
-        e.preventDefault();
-        if (!this.currentDragged) return;
-        const draggedNode = document.querySelectorAll(`.active-item[data-module-name="${this.currentDragged}"]`)[1];
-        draggedNode.classList.add('deletable');
-      },
-      dragleave(e) {
-        e.preventDefault();
-        if (!this.currentDragged) return;
-        const draggedNode = document.querySelectorAll(`.active-item[data-module-name="${this.currentDragged}"]`)[1];
-        draggedNode.classList.remove('deletable');
-      },
+      this.setCurrentDragged({ moduleName: null });
     },
-    components: {
-      ModuleGallery,
-      PaletteGallery,
-      PluginGallery,
-      PresetGallery,
-      ProjectGallery,
-      SearchBar,
+    dragover(e) {
+      e.preventDefault();
+      if (!this.currentDragged) return;
+      const draggedNode = document.querySelectorAll(`.active-item[data-module-name="${this.currentDragged}"]`)[1];
+      draggedNode.classList.add('deletable');
     },
-  };
+    dragleave(e) {
+      e.preventDefault();
+      if (!this.currentDragged) return;
+      const draggedNode = document.querySelectorAll(`.active-item[data-module-name="${this.currentDragged}"]`)[1];
+      draggedNode.classList.remove('deletable');
+    },
+  },
+  components: {
+    ModuleGallery,
+    PaletteGallery,
+    PluginGallery,
+    PresetGallery,
+    ProjectGallery,
+    SearchBar,
+  },
+};
 </script>
 
 <style lang="scss">

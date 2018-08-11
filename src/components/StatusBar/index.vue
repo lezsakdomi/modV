@@ -25,72 +25,72 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex';
-  import projectItem from './Project';
+import { mapGetters } from 'vuex';
+import projectItem from './Project';
 
-  export default {
-    name: 'statusBar',
-    components: {
-      projectItem,
+export default {
+  name: 'statusBar',
+  components: {
+    projectItem,
+  },
+  data() {
+    return {
+      sizeModalOpen: false,
+      width: 0,
+      height: 0,
+    };
+  },
+  computed: {
+    ...mapGetters('tempo', [
+      'bpm',
+      'detect',
+    ]),
+    ...mapGetters('layers', [
+      'allLayers',
+    ]),
+    ...mapGetters('windows', [
+      'largestWindowSize',
+      'largestWindowReference',
+    ]),
+    activeModules() {
+      return this.$store.state.modVModules.active;
     },
-    data() {
-      return {
-        sizeModalOpen: false,
-        width: 0,
-        height: 0,
-      };
+    sizeOut() {
+      return `${this.largestWindowSize.width}𝗑${this.largestWindowSize.height}px`;
     },
-    computed: {
-      ...mapGetters('tempo', [
-        'bpm',
-        'detect',
-      ]),
-      ...mapGetters('layers', [
-        'allLayers',
-      ]),
-      ...mapGetters('windows', [
-        'largestWindowSize',
-        'largestWindowReference',
-      ]),
-      activeModules() {
-        return this.$store.state.modVModules.active;
-      },
-      sizeOut() {
-        return `${this.largestWindowSize.width}𝗑${this.largestWindowSize.height}px`;
-      },
-      nonGalleryModules() {
-        return Object
-          .keys(this.activeModules)
-          .filter(moduleName => moduleName.indexOf('-gallery') < 0)
-          .length;
-      },
+    nonGalleryModules() {
+      return Object
+        .keys(this.activeModules)
+        .filter(moduleName => moduleName.indexOf('-gallery') < 0)
+        .length;
     },
-    methods: {
-      setWindowSize() {
-        this.resizeWindow(this.largestWindowReference(), this.width, this.height);
-      },
-      resizeWindow(window, width, height) {
-        if (window.outerWidth) {
-          window.resizeTo(
-            width + (window.outerWidth - window.innerWidth),
-            height + (window.outerHeight - window.innerHeight),
-          );
-        } else {
-          window.resizeTo(500, 500);
-          window.resizeTo(
-            width + (500 - document.body.offsetWidth),
-            height + (500 - document.body.offsetHeight),
-          );
-        }
-      },
+  },
+  methods: {
+    setWindowSize() {
+      this.resizeWindow(this.largestWindowReference(), this.width, this.height);
     },
-    watch: {
-      largestWindowSize(value) {
-        this.width = value.width;
-        this.height = value.height;
-      },
+    resizeWindow(window, width, height) {
+      if (window.outerWidth) {
+        window.resizeTo(
+          width + (window.outerWidth - window.innerWidth),
+          height + (window.outerHeight - window.innerHeight),
+        );
+      } else {
+        window.resizeTo(500, 500);
+        window.resizeTo(
+          width + (500 - document.body.offsetWidth),
+          height + (500 - document.body.offsetHeight),
+        );
+      }
     },
-  };
+  },
+  watch: {
+    largestWindowSize(value) {
+      this.width = value.width;
+      this.height = value.height;
+    },
+  },
+};
 </script>
 
 <style lang="scss">

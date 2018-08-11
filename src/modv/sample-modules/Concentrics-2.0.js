@@ -78,7 +78,9 @@ export default {
     this.circle2 = new (this.Concentric())(canvas);
   },
 
-  draw({ canvas, context, features, delta }) {
+  draw({
+    canvas, context, features, delta,
+  }) {
     let zcr = features.zcr;
     if (this.rms) zcr = features.rms;
 

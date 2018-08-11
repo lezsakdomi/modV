@@ -2,7 +2,9 @@ import { webgl } from '@/modv';
 
 let modVCanvasTexture;
 
-function render({ Module, canvas, context, pipeline }) {
+function render({
+  Module, canvas, context, pipeline,
+}) {
   const regl = webgl.regl;
 
   if (!modVCanvasTexture) {

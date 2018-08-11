@@ -1,7 +1,12 @@
 <template>
-  <div class="column active-item" :class="{current: focused}" tabindex="0" @focus="focusActiveModule" @dragstart="dragstart">
+  <div
+    class="column active-item"
+    :class="{current: focused}"
+    tabindex="0"
+    @focus="focusActiveModule"
+    @dragstart="dragstart"
+  >
     <div class="columns is-gapless is-mobile">
-      <!-- <canvas class="preview"></canvas> --><!-- TODO: create preview option on mouseover item -->
       <div class="column is-12">
         <div class="active-module-wrapper">
           <div class="columns is-gapless is-mobile">
@@ -27,7 +32,6 @@
                       </div>
                       <div class="control-group blending-group">
                         <label for="">Blending</label>
-                        <!-- <dropdown :data="operations" grouped placeholder="Normal" :width="150" :cbChanged="compositeOperationChanged"></dropdown> -->
                         <b-dropdown class="dropdown" v-model="compositeOperation">
                           <button class="button is-primary is-small" slot="trigger">
                             <span>{{ compositeOperation | capitalize }}</span>
@@ -70,203 +74,203 @@
 </template>
 
 <script>
-  import { mapGetters, mapMutations } from 'vuex';
-  import OpacityControl from './OpacityControl';
+import { mapGetters, mapMutations } from 'vuex';
+import OpacityControl from './OpacityControl';
 
-  export default {
-    name: 'activeModule',
-    components: {
-      OpacityControl,
-    },
-    data() {
-      return {
-        compositeOperation: 'normal',
-        opacity: null,
-        checkboxMenuOptions: {
-          match: ['@modv/module:internal'],
-          menuItems: [],
-          internalVariable: 'enable',
-        },
-        opacityMenuOptions: {
-          match: ['@modv/module:internal'],
-          menuItems: [],
-          internalVariable: 'alpha',
-        },
-        operations: [{
-          label: 'Blend Modes',
-          children: [{
-            label: 'Normal',
-            value: 'normal',
-          }, {
-            label: 'Multiply',
-            value: 'multiply',
-          }, {
-            label: 'Overlay',
-            value: 'overlay',
-          }, {
-            label: 'Darken',
-            value: 'darken',
-          }, {
-            label: 'Lighten',
-            value: 'lighten',
-          }, {
-            label: 'Color Dodge',
-            value: 'color-dodge',
-          }, {
-            label: 'Color Burn',
-            value: 'color-burn',
-          }, {
-            label: 'Hard Light',
-            value: 'hard-light',
-          }, {
-            label: 'Soft Light',
-            value: 'soft-light',
-          }, {
-            label: 'Difference',
-            value: 'difference',
-          }, {
-            label: 'Exclusion',
-            value: 'exclusion',
-          }, {
-            label: 'Hue',
-            value: 'hue',
-          }, {
-            label: 'Saturation',
-            value: 'saturation',
-          }, {
-            label: 'Color',
-            value: 'color',
-          }, {
-            label: 'Luminosity',
-            value: 'luminosity',
-          }],
-        },
-        {
-          label: 'Composite Modes',
-          children: [{
-            label: 'Clear',
-            value: 'clear',
-          }, {
-            label: 'Copy',
-            value: 'copy',
-          }, {
-            label: 'Destination',
-            value: 'destination',
-          }, {
-            label: 'Source Over',
-            value: 'source-over',
-          }, {
-            label: 'Destination Over',
-            value: 'destination-over',
-          }, {
-            label: 'Source In',
-            value: 'source-in',
-          }, {
-            label: 'Destination In',
-            value: 'destination-in',
-          }, {
-            label: 'Source Out',
-            value: 'source-out',
-          }, {
-            label: 'Destination Out',
-            value: 'destination-out',
-          }, {
-            label: 'Source Atop',
-            value: 'source-atop',
-          }, {
-            label: 'Destination Atop',
-            value: 'destination-atop',
-          }, {
-            label: 'Xor',
-            value: 'xor',
-          }, {
-            label: 'Lighter',
-            value: 'lighter',
-          }],
+export default {
+  name: 'activeModule',
+  components: {
+    OpacityControl,
+  },
+  data() {
+    return {
+      compositeOperation: 'normal',
+      opacity: null,
+      checkboxMenuOptions: {
+        match: ['@modv/module:internal'],
+        menuItems: [],
+        internalVariable: 'enable',
+      },
+      opacityMenuOptions: {
+        match: ['@modv/module:internal'],
+        menuItems: [],
+        internalVariable: 'alpha',
+      },
+      operations: [{
+        label: 'Blend Modes',
+        children: [{
+          label: 'Normal',
+          value: 'normal',
+        }, {
+          label: 'Multiply',
+          value: 'multiply',
+        }, {
+          label: 'Overlay',
+          value: 'overlay',
+        }, {
+          label: 'Darken',
+          value: 'darken',
+        }, {
+          label: 'Lighten',
+          value: 'lighten',
+        }, {
+          label: 'Color Dodge',
+          value: 'color-dodge',
+        }, {
+          label: 'Color Burn',
+          value: 'color-burn',
+        }, {
+          label: 'Hard Light',
+          value: 'hard-light',
+        }, {
+          label: 'Soft Light',
+          value: 'soft-light',
+        }, {
+          label: 'Difference',
+          value: 'difference',
+        }, {
+          label: 'Exclusion',
+          value: 'exclusion',
+        }, {
+          label: 'Hue',
+          value: 'hue',
+        }, {
+          label: 'Saturation',
+          value: 'saturation',
+        }, {
+          label: 'Color',
+          value: 'color',
+        }, {
+          label: 'Luminosity',
+          value: 'luminosity',
         }],
-      };
+      },
+      {
+        label: 'Composite Modes',
+        children: [{
+          label: 'Clear',
+          value: 'clear',
+        }, {
+          label: 'Copy',
+          value: 'copy',
+        }, {
+          label: 'Destination',
+          value: 'destination',
+        }, {
+          label: 'Source Over',
+          value: 'source-over',
+        }, {
+          label: 'Destination Over',
+          value: 'destination-over',
+        }, {
+          label: 'Source In',
+          value: 'source-in',
+        }, {
+          label: 'Destination In',
+          value: 'destination-in',
+        }, {
+          label: 'Source Out',
+          value: 'source-out',
+        }, {
+          label: 'Destination Out',
+          value: 'destination-out',
+        }, {
+          label: 'Source Atop',
+          value: 'source-atop',
+        }, {
+          label: 'Destination Atop',
+          value: 'destination-atop',
+        }, {
+          label: 'Xor',
+          value: 'xor',
+        }, {
+          label: 'Lighter',
+          value: 'lighter',
+        }],
+      }],
+    };
+  },
+  props: [
+    'moduleName',
+  ],
+  computed: {
+    ...mapGetters('modVModules', [
+      'activeModules',
+      'focusedModuleName',
+    ]),
+    module() {
+      return this.$store.state.modVModules.active[this.moduleName];
     },
-    props: [
-      'moduleName',
-    ],
-    computed: {
-      ...mapGetters('modVModules', [
-        'activeModules',
-        'focusedModuleName',
-      ]),
-      module() {
-        return this.$store.state.modVModules.active[this.moduleName];
-      },
-      enabledCheckboxId() {
-        return `${this.moduleName}:modvreserved:enabled`;
-      },
-      enabled: {
-        get() {
-          if (!this.moduleName) return false;
-          return this.$store.state.modVModules.active[this.moduleName].meta.enabled;
-        },
-        set(value) {
-          this.setActiveModuleEnabled({
-            moduleName: this.moduleName,
-            enabled: value,
-          });
-        },
-      },
-      focused() {
-        return this.moduleName === this.focusedModuleName;
-      },
-      blendModes() {
-        return this.operations[0];
-      },
-      compositeOperations() {
-        return this.operations[1];
-      },
+    enabledCheckboxId() {
+      return `${this.moduleName}:modvreserved:enabled`;
     },
-    methods: {
-      ...mapMutations('modVModules', [
-        'setCurrentDragged',
-        'setModuleFocus',
-        'setActiveModuleEnabled',
-        'setActiveModuleCompositeOperation',
-      ]),
-      focusActiveModule() {
-        this.setModuleFocus({ activeModuleName: this.moduleName });
+    enabled: {
+      get() {
+        if (!this.moduleName) return false;
+        return this.$store.state.modVModules.active[this.moduleName].meta.enabled;
       },
-      dragstart() {
-        this.setCurrentDragged({ moduleName: this.moduleName });
-      },
-      compositeOperationChanged(item) {
-        this.compositeOperation = item[0].value;
-      },
-      checkboxClick() {
-        this.enabled = !this.enabled;
-      },
-    },
-    mounted() {
-      if (!this.module) return;
-      this.enabled = this.module.meta.enabled;
-      this.opacity = this.module.meta.alpha;
-
-      this.operations[0]
-        .children.find(item => item.value === this.module.meta.compositeOperation).selected = true;
-    },
-    watch: {
-      compositeOperation() {
-        this.setActiveModuleCompositeOperation({
+      set(value) {
+        this.setActiveModuleEnabled({
           moduleName: this.moduleName,
-          compositeOperation: this.compositeOperation,
+          enabled: value,
         });
       },
     },
-    filters: {
-      capitalize(valueIn) {
-        let value = valueIn;
-        if (!value) return '';
-        value = value.toString();
-        return value.charAt(0).toUpperCase() + value.slice(1);
-      },
+    focused() {
+      return this.moduleName === this.focusedModuleName;
     },
-  };
+    blendModes() {
+      return this.operations[0];
+    },
+    compositeOperations() {
+      return this.operations[1];
+    },
+  },
+  methods: {
+    ...mapMutations('modVModules', [
+      'setCurrentDragged',
+      'setModuleFocus',
+      'setActiveModuleEnabled',
+      'setActiveModuleCompositeOperation',
+    ]),
+    focusActiveModule() {
+      this.setModuleFocus({ activeModuleName: this.moduleName });
+    },
+    dragstart() {
+      this.setCurrentDragged({ moduleName: this.moduleName });
+    },
+    compositeOperationChanged(item) {
+      this.compositeOperation = item[0].value;
+    },
+    checkboxClick() {
+      this.enabled = !this.enabled;
+    },
+  },
+  mounted() {
+    if (!this.module) return;
+    this.enabled = this.module.meta.enabled;
+    this.opacity = this.module.meta.alpha;
+
+    this.operations[0]
+      .children.find(item => item.value === this.module.meta.compositeOperation).selected = true;
+  },
+  watch: {
+    compositeOperation() {
+      this.setActiveModuleCompositeOperation({
+        moduleName: this.moduleName,
+        compositeOperation: this.compositeOperation,
+      });
+    },
+  },
+  filters: {
+    capitalize(valueIn) {
+      let value = valueIn;
+      if (!value) return '';
+      value = value.toString();
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    },
+  },
+};
 </script>
 
 <style lang='scss'>

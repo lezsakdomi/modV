@@ -52,7 +52,9 @@ function compileExpression(expression, additionalScope = {}) {
 
 // actions
 const actions = {
-  addExpression({ commit }, { expression, moduleName, controlVariable, scopeAdditions }) {
+  addExpression({ commit }, {
+    expression, moduleName, controlVariable, scopeAdditions,
+  }) {
     const Module = store.state.modVModules.active[moduleName];
     if (!Module) return;
     if (typeof Module.props[controlVariable] === 'undefined') return;

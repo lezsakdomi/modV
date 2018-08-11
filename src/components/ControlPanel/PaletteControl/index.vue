@@ -12,6 +12,7 @@
         <div
           class="swatch"
           v-for="(color, idx) in colors"
+          :key="idx"
           :style="{
             backgroundColor: `rgb(${color.r},${color.g},${color.b})`,
             transitionDuration: `${duration / colors.length}ms`,
@@ -110,229 +111,229 @@
 </template>
 
 <script>
-  import { mapActions, mapGetters } from 'vuex';
-  import draggable from 'vuedraggable';
-  import { Sketch } from 'vue-color';
+import { mapActions, mapGetters } from 'vuex';
+import draggable from 'vuedraggable';
+import { Sketch } from 'vue-color';
 
-  import PaletteSelector from './PaletteSelector';
-  import ProjectSelector from '../ProjectSelector';
+import PaletteSelector from './PaletteSelector';
+import ProjectSelector from '../ProjectSelector';
 
-  const defaultProps = {
-    hex: '#194d33',
-    hsl: {
-      h: 150,
-      s: 0.5,
-      l: 0.2,
-      a: 1,
-    },
-    hsv: {
-      h: 150,
-      s: 0.66,
-      v: 0.30,
-      a: 1,
-    },
-    rgba: {
-      r: 25,
-      g: 77,
-      b: 51,
-      a: 1,
-    },
+const defaultProps = {
+  hex: '#194d33',
+  hsl: {
+    h: 150,
+    s: 0.5,
+    l: 0.2,
     a: 1,
-  };
+  },
+  hsv: {
+    h: 150,
+    s: 0.66,
+    v: 0.30,
+    a: 1,
+  },
+  rgba: {
+    r: 25,
+    g: 77,
+    b: 51,
+    a: 1,
+  },
+  a: 1,
+};
 
-  export default {
-    name: 'paletteControl',
-    props: [
-      'module',
-      'meta',
-    ],
-    data() {
-      return {
-        dragOptions: {
-          group: {
-            name: 'palette',
-            pull: true,
-            put: true,
-          },
+export default {
+  name: 'paletteControl',
+  props: [
+    'module',
+    'meta',
+  ],
+  data() {
+    return {
+      dragOptions: {
+        group: {
+          name: 'palette',
+          pull: true,
+          put: true,
         },
-        durationInput: undefined,
-        pickerColors: defaultProps,
-        showPicker: false,
-        useBpmInput: false,
-        bpmDivisionInput: 16,
-        projectSelectorInput: 'default',
-        paletteSelectorInput: '',
-        savePaletteNameInput: '',
-      };
+      },
+      durationInput: undefined,
+      pickerColors: defaultProps,
+      showPicker: false,
+      useBpmInput: false,
+      bpmDivisionInput: 16,
+      projectSelectorInput: 'default',
+      paletteSelectorInput: '',
+      savePaletteNameInput: '',
+    };
+  },
+  computed: {
+    options() {
+      return this.meta.control.options;
     },
-    computed: {
-      options() {
-        return this.meta.control.options;
-      },
-      moduleName() {
-        return this.meta.$modv_moduleName;
-      },
-      inputId() {
-        return `${this.moduleName}-${this.variable}`;
-      },
-      value: {
-        get() {
-          return this.$store.state.modVModules.active[this.moduleName][this.variable];
-        },
-        set(value) {
-          this.$store.dispatch('modVModules/updateProp', {
-            name: this.moduleName,
-            prop: this.variable,
-            data: value,
-          });
-        },
-      },
-      variable() {
-        return this.meta.$modv_variable;
-      },
-      label() {
-        return this.meta.label || this.variable;
-      },
-      defaultValue() {
-        return this.options.colors;
-      },
-      ...mapGetters('palettes', [
-        'allPalettes',
-      ]),
-      palette() {
-        return this.$store.state.palettes.palettes[`${this.moduleName}-${this.variable}`];
-      },
-      colors: {
-        get() {
-          return this.palette.colors;
-        },
-        set(value) {
-          this.updateColors({
-            id: this.inputId,
-            colors: value,
-          });
-        },
-      },
-      duration() {
-        return this.palette.duration;
-      },
-      useBpm() {
-        return this.palette.useBpm;
-      },
-      bpmDivision() {
-        return this.palette.bpmDivision;
-      },
-      pickerButtonText() {
-        return this.showPicker ? 'Hide' : 'Show';
-      },
-      currentColor() {
-        return this.palette.currentColor;
-      },
-      toColor() {
-        const nextColor = this.palette.currentColor + 1;
-        if (nextColor > this.colors.length - 1) return 0;
-        return nextColor;
-      },
+    moduleName() {
+      return this.meta.$modv_moduleName;
     },
-    methods: {
-      ...mapActions('palettes', [
-        'createPalette',
-        'updateColors',
-        'updateDuration',
-        'updateUseBpm',
-        'updateBpmDivision',
-      ]),
-      ...mapGetters('projects', [
-        'getPaletteFromProject',
-      ]),
-      ...mapActions('projects', [
-        'savePaletteToProject',
-      ]),
-      addSwatch() {
-        const updatedColors = this.colors.slice();
-        updatedColors.push(this.pickerColors.rgba);
-
-        this.updateColors({
-          id: this.inputId,
-          colors: updatedColors,
-        });
+    inputId() {
+      return `${this.moduleName}-${this.variable}`;
+    },
+    value: {
+      get() {
+        return this.$store.state.modVModules.active[this.moduleName][this.variable];
       },
-      removeSwatch(idx) {
-        const updatedColors = this.colors.slice();
-        updatedColors.splice(idx, 1);
-
-        this.updateColors({
-          id: this.inputId,
-          colors: updatedColors,
-        });
-      },
-      togglePicker() {
-        this.showPicker = !this.showPicker;
-      },
-      clickLoadPalette() {
-        let palette = this.getPaletteFromProject()({
-          paletteName: this.paletteSelectorInput,
-          projectName: this.projectSelectorInput,
-        });
-
-        if (Array.isArray(palette)) {
-          palette = palette.map(c => ({ r: c[0], g: c[1], b: c[2] }));
-        }
-
-        this.updateColors({
-          id: this.inputId,
-          colors: palette,
-        });
-      },
-      clickSavePalette() {
-        this.savePaletteToProject({
-          projectName: this.projectSelectorInput,
-          paletteName: this.savePaletteNameInput,
-          colors: this.colors,
+      set(value) {
+        this.$store.dispatch('modVModules/updateProp', {
+          name: this.moduleName,
+          prop: this.variable,
+          data: value,
         });
       },
     },
-    beforeMount() {
+    variable() {
+      return this.meta.$modv_variable;
+    },
+    label() {
+      return this.meta.label || this.variable;
+    },
+    defaultValue() {
+      return this.options.colors;
+    },
+    ...mapGetters('palettes', [
+      'allPalettes',
+    ]),
+    palette() {
+      return this.$store.state.palettes.palettes[`${this.moduleName}-${this.variable}`];
+    },
+    colors: {
+      get() {
+        return this.palette.colors;
+      },
+      set(value) {
+        this.updateColors({
+          id: this.inputId,
+          colors: value,
+        });
+      },
+    },
+    duration() {
+      return this.palette.duration;
+    },
+    useBpm() {
+      return this.palette.useBpm;
+    },
+    bpmDivision() {
+      return this.palette.bpmDivision;
+    },
+    pickerButtonText() {
+      return this.showPicker ? 'Hide' : 'Show';
+    },
+    currentColor() {
+      return this.palette.currentColor;
+    },
+    toColor() {
+      const nextColor = this.palette.currentColor + 1;
+      if (nextColor > this.colors.length - 1) return 0;
+      return nextColor;
+    },
+  },
+  methods: {
+    ...mapActions('palettes', [
+      'createPalette',
+      'updateColors',
+      'updateDuration',
+      'updateUseBpm',
+      'updateBpmDivision',
+    ]),
+    ...mapGetters('projects', [
+      'getPaletteFromProject',
+    ]),
+    ...mapActions('projects', [
+      'savePaletteToProject',
+    ]),
+    addSwatch() {
+      const updatedColors = this.colors.slice();
+      updatedColors.push(this.pickerColors.rgba);
+
+      this.updateColors({
+        id: this.inputId,
+        colors: updatedColors,
+      });
+    },
+    removeSwatch(idx) {
+      const updatedColors = this.colors.slice();
+      updatedColors.splice(idx, 1);
+
+      this.updateColors({
+        id: this.inputId,
+        colors: updatedColors,
+      });
+    },
+    togglePicker() {
+      this.showPicker = !this.showPicker;
+    },
+    clickLoadPalette() {
+      let palette = this.getPaletteFromProject()({
+        paletteName: this.paletteSelectorInput,
+        projectName: this.projectSelectorInput,
+      });
+
+      if (Array.isArray(palette)) {
+        palette = palette.map(c => ({ r: c[0], g: c[1], b: c[2] }));
+      }
+
+      this.updateColors({
+        id: this.inputId,
+        colors: palette,
+      });
+    },
+    clickSavePalette() {
+      this.savePaletteToProject({
+        projectName: this.projectSelectorInput,
+        paletteName: this.savePaletteNameInput,
+        colors: this.colors,
+      });
+    },
+  },
+  beforeMount() {
+    this.value = this.module[this.variable];
+    if (typeof this.value === 'undefined') this.value = this.options.colors;
+
+    this.durationInput = this.duration;
+    this.useBpmInput = this.useBpm;
+    this.bpmDivisionInput = this.bpmDivision;
+  },
+  watch: {
+    module() {
       this.value = this.module[this.variable];
-      if (typeof this.value === 'undefined') this.value = this.options.colors;
-
-      this.durationInput = this.duration;
-      this.useBpmInput = this.useBpm;
-      this.bpmDivisionInput = this.bpmDivision;
     },
-    watch: {
-      module() {
-        this.value = this.module[this.variable];
-      },
-      value() {
-        this.module[this.variable] = this.value;
-      },
-      durationInput() {
-        this.updateDuration({
-          id: this.inputId,
-          duration: this.durationInput,
-        });
-      },
-      useBpmInput() {
-        this.updateUseBpm({
-          id: this.inputId,
-          useBpm: this.useBpmInput,
-        });
-      },
-      bpmDivisionInput() {
-        this.updateBpmDivision({
-          id: this.inputId,
-          bpmDivision: this.bpmDivisionInput,
-        });
-      },
+    value() {
+      this.module[this.variable] = this.value;
     },
-    components: {
-      'sketch-picker': Sketch,
-      PaletteSelector,
-      ProjectSelector,
-      draggable,
+    durationInput() {
+      this.updateDuration({
+        id: this.inputId,
+        duration: this.durationInput,
+      });
     },
-  };
+    useBpmInput() {
+      this.updateUseBpm({
+        id: this.inputId,
+        useBpm: this.useBpmInput,
+      });
+    },
+    bpmDivisionInput() {
+      this.updateBpmDivision({
+        id: this.inputId,
+        bpmDivision: this.bpmDivisionInput,
+      });
+    },
+  },
+  components: {
+    'sketch-picker': Sketch,
+    PaletteSelector,
+    ProjectSelector,
+    draggable,
+  },
+};
 </script>
 
 <style scoped lang="scss">

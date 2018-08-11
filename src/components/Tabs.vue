@@ -3,15 +3,22 @@
     <div class="tab-menu">
       <div
         class="tab"
-        v-for='i in amount' @click='focusTab(i)'
+        v-for="i in amount"
+        @click="focusTab(i)"
         :class="{ 'selected': focusedTabIndex === i }"
         :style="`width: ${100 / amount}%`"
+        :key="i"
       >
         {{ titles[i-1] }}
       </div>
     </div>
     <div class="tab-contents" data-simplebar-direction="vertical">
-      <div class="tab-content" :class="{ show: focusedTabIndex === i }" v-for='i in amount'>
+      <div
+        class="tab-content"
+        :class="{ show: focusedTabIndex === i }"
+        v-for="i in amount"
+        :key="i"
+      >
         <slot
           :name='`tab-${i}`'
         ></slot>
@@ -22,28 +29,28 @@
 
 <script>
 
-  export default {
-    name: 'tabs',
-    props: [
-      'titles',
-    ],
-    data() {
-      return {
-        focusedTabIndex: 1,
-      };
+export default {
+  name: 'tabs',
+  props: [
+    'titles',
+  ],
+  data() {
+    return {
+      focusedTabIndex: 1,
+    };
+  },
+  computed: {
+    amount() {
+      if (!this.titles) return 0;
+      return this.titles.length;
     },
-    computed: {
-      amount() {
-        if (!this.titles) return 0;
-        return this.titles.length;
-      },
+  },
+  methods: {
+    focusTab(tabIndex) {
+      this.focusedTabIndex = tabIndex;
     },
-    methods: {
-      focusTab(tabIndex) {
-        this.focusedTabIndex = tabIndex;
-      },
-    },
-  };
+  },
+};
 </script>
 
 <style scoped lang='scss'>

@@ -3,7 +3,7 @@
     <div class="column is-12">
       <div class="columns is-multiline">
 
-        <div class="column is-12" v-for="(plugin, pluginName) in plugins">
+        <div class="column is-12" v-for="(plugin, pluginName) in plugins" :key="pluginName">
           <div>
             <b-switch
               :value="plugin.enabled"
@@ -35,47 +35,47 @@
 </template>
 
 <script>
-  import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
-  export default {
-    name: 'pluginGallery',
-    data() {
-      return {
-        loading: null,
-      };
+export default {
+  name: 'pluginGallery',
+  data() {
+    return {
+      loading: null,
+    };
+  },
+  props: {
+    phrase: {
+      type: String,
+      required: true,
+      default: '',
     },
-    props: {
-      phrase: {
-        type: String,
-        required: true,
-        default: '',
-      },
-    },
-    computed: {
-      ...mapGetters('plugins', [
-        'plugins',
-      ]),
-    },
-    methods: {
-      ...mapActions('plugins', [
-        'save',
-        'setEnabled',
-      ]),
-      search(textIn, termIn) {
-        const text = textIn.toLowerCase().trim();
-        const term = termIn.toLowerCase().trim();
-        if (termIn.length < 1) return true;
+  },
+  computed: {
+    ...mapGetters('plugins', [
+      'plugins',
+    ]),
+  },
+  methods: {
+    ...mapActions('plugins', [
+      'save',
+      'setEnabled',
+    ]),
+    search(textIn, termIn) {
+      const text = textIn.toLowerCase().trim();
+      const term = termIn.toLowerCase().trim();
+      if (termIn.length < 1) return true;
 
-        return text.indexOf(term) > -1;
-      },
-      switchPlugin(e, { pluginName }) {
-        this.setEnabled({ enabled: e, pluginName });
-      },
-      savePluginSettings({ pluginName }) {
-        this.save({ pluginName });
-      },
+      return text.indexOf(term) > -1;
     },
-  };
+    switchPlugin(e, { pluginName }) {
+      this.setEnabled({ enabled: e, pluginName });
+    },
+    savePluginSettings({ pluginName }) {
+      this.save({ pluginName });
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>

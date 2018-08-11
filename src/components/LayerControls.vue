@@ -30,7 +30,7 @@
 
                   <b-dropdown-item :value="-1">Last Layer</b-dropdown-item>
                   <b-dropdown-item
-                    v-for="layer, idx in layers"
+                    v-for="(layer, idx) in layers"
                     :key="idx"
                     :value="idx"
                   >{{ layer.name }}</b-dropdown-item>
@@ -57,101 +57,101 @@
 </template>
 
 <script>
-  import { mapGetters, mapMutations } from 'vuex';
+import { mapGetters, mapMutations } from 'vuex';
 
-  export default {
-    name: 'layerControls',
-    data() {
-      return {
-        clearingChecked: false,
-        inheritChecked: false,
-        pipelineChecked: false,
-        drawToOutputChecked: false,
-        inheritanceIndex: -1,
-      };
+export default {
+  name: 'layerControls',
+  data() {
+    return {
+      clearingChecked: false,
+      inheritChecked: false,
+      pipelineChecked: false,
+      drawToOutputChecked: false,
+      inheritanceIndex: -1,
+    };
+  },
+  computed: {
+    ...mapGetters('layers', {
+      Layer: 'focusedLayer',
+      layers: 'allLayers',
+      layerIndex: 'focusedLayerIndex',
+    }),
+    name() {
+      if (!this.Layer) return '';
+      if (!('name' in this.Layer)) return '';
+      return this.Layer.name;
     },
-    computed: {
-      ...mapGetters('layers', {
-        Layer: 'focusedLayer',
-        layers: 'allLayers',
-        layerIndex: 'focusedLayerIndex',
-      }),
-      name() {
-        if (!this.Layer) return '';
-        if (!('name' in this.Layer)) return '';
-        return this.Layer.name;
-      },
-      inheritedLayerName() {
-        if (this.inheritanceIndex < 0) {
-          return 'Last Layer';
-        }
+    inheritedLayerName() {
+      if (this.inheritanceIndex < 0) {
+        return 'Last Layer';
+      }
 
-        return this.layers[this.inheritanceIndex || 0].name;
-      },
+      return this.layers[this.inheritanceIndex || 0].name;
     },
-    methods: {
-      ...mapMutations('layers', [
-        'setClearing',
-        'setInherit',
-        'setInheritFrom',
-        'setPipeline',
-        'setDrawToOutput',
-      ]),
-      updateChecked() {
-        const Layer = this.Layer;
+  },
+  methods: {
+    ...mapMutations('layers', [
+      'setClearing',
+      'setInherit',
+      'setInheritFrom',
+      'setPipeline',
+      'setDrawToOutput',
+    ]),
+    updateChecked() {
+      const { Layer } = this;
 
-        this.clearingChecked = Layer.clearing;
-        this.inheritChecked = Layer.inherit;
-        this.inheritanceIndex = Layer.inheritFrom;
-        this.pipelineChecked = Layer.pipeline;
-        this.drawToOutputChecked = Layer.drawToOutput;
-      },
+      this.clearingChecked = Layer.clearing;
+      this.inheritChecked = Layer.inherit;
+      this.inheritanceIndex = Layer.inheritFrom;
+      this.pipelineChecked = Layer.pipeline;
+      this.drawToOutputChecked = Layer.drawToOutput;
     },
-    watch: {
-      Layer: {
-        handler() {
-          if (!this.Layer) return;
-          this.updateChecked();
-        },
-        deep: true,
+  },
+  watch: {
+    Layer: {
+      handler() {
+        if (!this.Layer) return;
+        this.updateChecked();
       },
-      clearingChecked() {
-        this.setClearing({
-          layerIndex: this.layerIndex,
-          clearing: this.clearingChecked,
-        });
-      },
-      inheritChecked() {
-        this.setInherit({
-          layerIndex: this.layerIndex,
-          inherit: this.inheritChecked,
-        });
-      },
-      inheritanceIndex() {
-        this.setInheritFrom({
-          layerIndex: this.layerIndex,
-          inheritFrom: this.inheritanceIndex,
-        });
-      },
-      pipelineChecked() {
-        this.setPipeline({
-          layerIndex: this.layerIndex,
-          pipeline: this.pipelineChecked,
-        });
-      },
-      drawToOutputChecked() {
-        this.setDrawToOutput({
-          layerIndex: this.layerIndex,
-          drawToOutput: this.drawToOutputChecked,
-        });
-      },
+      deep: true,
     },
-    mounted() {
-      if (!this.Layer) return;
+    clearingChecked() {
+      this.setClearing({
+        layerIndex: this.layerIndex,
+        clearing: this.clearingChecked,
+      });
+    },
+    inheritChecked() {
+      this.setInherit({
+        layerIndex: this.layerIndex,
+        inherit: this.inheritChecked,
+      });
+    },
+    inheritanceIndex() {
+      this.setInheritFrom({
+        layerIndex: this.layerIndex,
+        inheritFrom: this.inheritanceIndex,
+      });
+    },
+    pipelineChecked() {
+      this.setPipeline({
+        layerIndex: this.layerIndex,
+        pipeline: this.pipelineChecked,
+      });
+    },
+    drawToOutputChecked() {
+      this.setDrawToOutput({
+        layerIndex: this.layerIndex,
+        drawToOutput: this.drawToOutputChecked,
+      });
+    },
+  },
+  mounted() {
+    if (!this.Layer) return;
 
-      this.updateChecked();
-    },
-  };
+    this.updateChecked();
+  },
+};
 </script>
 
 <style lang="scss">

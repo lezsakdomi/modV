@@ -12,7 +12,11 @@
       <div class="column is-12">
         <div class="control-bar handle columns is-gapless is-mobile" v-context-menu="menuOptions">
           <div class="column is-three-quarters">
-            <div class="layer-title" @dblclick="startNameEdit" @keydown.enter="stopNameEdit">{{ name }}</div>
+            <div
+              class="layer-title"
+              @dblclick="startNameEdit"
+              @keydown.enter="stopNameEdit"
+            >{{ name }}</div>
           </div>
 
           <div class="column is-one-quarter layer-item-controls">
@@ -58,303 +62,303 @@
 </template>
 
 <script>
-  import { mapActions, mapGetters, mapMutations } from 'vuex';
-  import ActiveModule from '@/components/ActiveModule';
-  import draggable from 'vuedraggable';
-  import { Menu, MenuItem } from 'nwjs-menu-browser';
+import { mapActions, mapGetters, mapMutations } from 'vuex';
+import ActiveModule from '@/components/ActiveModule';
+import draggable from 'vuedraggable';
+import { Menu, MenuItem } from 'nwjs-menu-browser';
 
-  if (!window.nw) {
-    window.nw = {
-      Menu,
-      MenuItem,
+if (!window.nw) {
+  window.nw = {
+    Menu,
+    MenuItem,
+  };
+}
+
+const { nw } = window;
+
+export default {
+  name: 'layer',
+  props: [
+    'Layer',
+    'LayerIndex',
+  ],
+  data() {
+    return {
+      menuOptions: {
+        match: ['layerItem'],
+        menuItems: [],
+        createMenus: this.createMenus,
+      },
+      clearingChecked: false,
+      inheritChecked: false,
+      pipelineChecked: false,
+      drawToOutputChecked: false,
     };
-  }
-
-  const nw = window.nw;
-
-  export default {
-    name: 'layer',
-    props: [
-      'Layer',
-      'LayerIndex',
-    ],
-    data() {
-      return {
-        menuOptions: {
-          match: ['layerItem'],
-          menuItems: [],
-          createMenus: this.createMenus,
-        },
-        clearingChecked: false,
-        inheritChecked: false,
-        pipelineChecked: false,
-        drawToOutputChecked: false,
-      };
+  },
+  computed: {
+    modules: {
+      get() {
+        return this.Layer.moduleOrder.map(moduleName => this.Layer.modules[moduleName]);
+      },
+      set(value) {
+        this.updateModuleOrder({ layerIndex: this.LayerIndex, order: value });
+      },
     },
-    computed: {
-      modules: {
-        get() {
-          return this.Layer.moduleOrder.map(moduleName => this.Layer.modules[moduleName]);
-        },
-        set(value) {
-          this.updateModuleOrder({ layerIndex: this.LayerIndex, order: value });
-        },
-      },
-      name() {
-        if (!this.Layer) return '';
-        if (!('name' in this.Layer)) return '';
-        return this.Layer.name;
-      },
-      locked() {
-        return this.Layer.locked;
-      },
-      collapsed() {
-        return this.Layer.collapsed;
-      },
-      ...mapGetters('layers', {
-        focusedLayerIndex: 'focusedLayerIndex',
-        layers: 'allLayers',
-      }),
+    name() {
+      if (!this.Layer) return '';
+      if (!('name' in this.Layer)) return '';
+      return this.Layer.name;
     },
-    methods: {
-      ...mapActions('layers', [
-        'addLayer',
-        'toggleLocked',
-        'toggleCollapsed',
-        'addModuleToLayer',
-        'updateModuleOrder',
-        'moveModuleInstance',
-      ]),
-      ...mapActions('modVModules', [
-        'createActiveModule',
-      ]),
-      ...mapMutations('layers', [
-        'setLayerName',
-        'setLayerFocus',
-        'setClearing',
-        'setInherit',
-        'setInheritFrom',
-        'setPipeline',
-        'setDrawToOutput',
-      ]),
-      drop(e) {
-        e.preventDefault();
-        const moduleName = e.item.dataset.moduleName;
+    locked() {
+      return this.Layer.locked;
+    },
+    collapsed() {
+      return this.Layer.collapsed;
+    },
+    ...mapGetters('layers', {
+      focusedLayerIndex: 'focusedLayerIndex',
+      layers: 'allLayers',
+    }),
+  },
+  methods: {
+    ...mapActions('layers', [
+      'addLayer',
+      'toggleLocked',
+      'toggleCollapsed',
+      'addModuleToLayer',
+      'updateModuleOrder',
+      'moveModuleInstance',
+    ]),
+    ...mapActions('modVModules', [
+      'createActiveModule',
+    ]),
+    ...mapMutations('layers', [
+      'setLayerName',
+      'setLayerFocus',
+      'setClearing',
+      'setInherit',
+      'setInheritFrom',
+      'setPipeline',
+      'setDrawToOutput',
+    ]),
+    drop(e) {
+      e.preventDefault();
+      const { moduleName } = e.item.dataset;
 
-        if (e.item.childNodes[0].classList.contains('gallery-item')) {
-          e.clone.parentNode.insertBefore(e.item, e.clone);
-          e.clone.parentNode.removeChild(e.clone);
+      if (e.item.childNodes[0].classList.contains('gallery-item')) {
+        e.clone.parentNode.insertBefore(e.item, e.clone);
+        e.clone.parentNode.removeChild(e.clone);
 
-          this.createActiveModule({ moduleName }).then((module) => {
-            this.addModuleToLayer({
-              module,
-              layerIndex: this.LayerIndex,
-              position: e.newIndex,
-            });
+        this.createActiveModule({ moduleName }).then((module) => {
+          this.addModuleToLayer({
+            module,
+            layerIndex: this.LayerIndex,
+            position: e.newIndex,
           });
-        } else {
-          const fromLayerIndex = parseInt(e.from.dataset.layerIndex, 10);
-          const toLayerIndex = this.LayerIndex;
-
-          this.moveModuleInstance({ fromLayerIndex, toLayerIndex, moduleName });
-        }
-      },
-      end(e) {
-        if (e.item) {
-          e.item.classList.remove('deletable');
-        }
-      },
-      startNameEdit() {
-        const node = this.$el.querySelector('.layer-title');
-        if (node.classList.contains('editable')) return;
-
-        node.classList.add('editable');
-        node.contentEditable = true;
-        node.focus();
-        node.addEventListener('blur', this.stopNameEdit);
-      },
-      stopNameEdit(e) {
-        const node = this.$el.querySelector('.layer-title');
-        node.removeEventListener('blur', this.stopNameEdit);
-        e.preventDefault();
-
-        if (!node.classList.contains('editable')) return;
-
-        const inputText = node.textContent.trim();
-
-        node.contentEditable = false;
-        node.classList.remove('editable');
-
-        if (inputText.length > 0) {
-          this.setLayerName({
-            LayerIndex: this.LayerIndex,
-            name: inputText,
-          });
-        } else {
-          node.textContent = this.Layer.name;
-        }
-      },
-      focusLayer() {
-        if (this.focusedLayerIndex === this.LayerIndex) return;
-        this.setLayerFocus({
-          LayerIndex: this.LayerIndex,
         });
-      },
-      dragover(e) {
-        if (this.locked) e.dataTransfer.dropEffect = 'none';
-      },
-      dragstart(e) {
-        const moduleName = e.target.dataset.moduleName;
-        e.dataTransfer.setData('module-name', moduleName);
-        e.dataTransfer.setData('layer-index', this.LayerIndex);
-      },
-      clickToggleLock() {
-        this.toggleLocked({ layerIndex: this.LayerIndex });
-      },
-      clickToggleCollapse() {
-        this.toggleCollapsed({ layerIndex: this.LayerIndex });
-      },
-      updateChecked() {
-        const Layer = this.Layer;
+      } else {
+        const fromLayerIndex = parseInt(e.from.dataset.layerIndex, 10);
+        const toLayerIndex = this.LayerIndex;
 
-        this.clearingChecked = Layer.clearing;
-        this.inheritChecked = Layer.inherit;
-        this.inheritanceIndex = Layer.inheritFrom;
-        this.pipelineChecked = Layer.pipeline;
-        this.drawToOutputChecked = Layer.drawToOutput;
-      },
-      createMenus() {
-        const that = this;
+        this.moveModuleInstance({ fromLayerIndex, toLayerIndex, moduleName });
+      }
+    },
+    end(e) {
+      if (e.item) {
+        e.item.classList.remove('deletable');
+      }
+    },
+    startNameEdit() {
+      const node = this.$el.querySelector('.layer-title');
+      if (node.classList.contains('editable')) return;
 
-        this.menuOptions.menuItems.splice(0, this.menuOptions.menuItems.length);
+      node.classList.add('editable');
+      node.contentEditable = true;
+      node.focus();
+      node.addEventListener('blur', this.stopNameEdit);
+    },
+    stopNameEdit(e) {
+      const node = this.$el.querySelector('.layer-title');
+      node.removeEventListener('blur', this.stopNameEdit);
+      e.preventDefault();
 
-        // Create inheritance index options
+      if (!node.classList.contains('editable')) return;
 
-        // <b-dropdown-item value="-1">Last Layer</b-dropdown-item>
-        //     <b-dropdown-item
-        //       v-for="layer, idx in layers"
-        //       :key="idx"
-        //       :value="idx"
-        //     >{{ layer.name }}</b-dropdown-item>
+      const inputText = node.textContent.trim();
 
-        const inheritFromSubmenu = new nw.Menu({});
+      node.contentEditable = false;
+      node.classList.remove('editable');
 
-        const item = new nw.MenuItem({
+      if (inputText.length > 0) {
+        this.setLayerName({
+          LayerIndex: this.LayerIndex,
+          name: inputText,
+        });
+      } else {
+        node.textContent = this.Layer.name;
+      }
+    },
+    focusLayer() {
+      if (this.focusedLayerIndex === this.LayerIndex) return;
+      this.setLayerFocus({
+        LayerIndex: this.LayerIndex,
+      });
+    },
+    dragover(e) {
+      if (this.locked) e.dataTransfer.dropEffect = 'none';
+    },
+    dragstart(e) {
+      const { moduleName } = e.target.dataset;
+      e.dataTransfer.setData('module-name', moduleName);
+      e.dataTransfer.setData('layer-index', this.LayerIndex);
+    },
+    clickToggleLock() {
+      this.toggleLocked({ layerIndex: this.LayerIndex });
+    },
+    clickToggleCollapse() {
+      this.toggleCollapsed({ layerIndex: this.LayerIndex });
+    },
+    updateChecked() {
+      const { Layer } = this;
+
+      this.clearingChecked = Layer.clearing;
+      this.inheritChecked = Layer.inherit;
+      this.inheritanceIndex = Layer.inheritFrom;
+      this.pipelineChecked = Layer.pipeline;
+      this.drawToOutputChecked = Layer.drawToOutput;
+    },
+    createMenus() {
+      const that = this;
+
+      this.menuOptions.menuItems.splice(0, this.menuOptions.menuItems.length);
+
+      // Create inheritance index options
+
+      // <b-dropdown-item value="-1">Last Layer</b-dropdown-item>
+      //     <b-dropdown-item
+      //       v-for="layer, idx in layers"
+      //       :key="idx"
+      //       :value="idx"
+      //     >{{ layer.name }}</b-dropdown-item>
+
+      const inheritFromSubmenu = new nw.Menu({});
+
+      const item = new nw.MenuItem({
+        type: 'checkbox',
+        label: 'Last Layer',
+        checked: this.Layer.inheritFrom === -1,
+        click: function click() {
+          that.setInheritFrom({
+            layerIndex: that.LayerIndex,
+            inheritFrom: -1,
+          });
+        },
+      });
+
+      inheritFromSubmenu.append(item);
+
+      this.layers.forEach((layer, idx) => {
+        const layerItem = new nw.MenuItem({
           type: 'checkbox',
-          label: 'Last Layer',
-          checked: this.Layer.inheritFrom === -1,
+          label: layer.name,
+          checked: this.Layer.inheritFrom === idx,
           click: function click() {
             that.setInheritFrom({
               layerIndex: that.LayerIndex,
-              inheritFrom: -1,
+              inheritFrom: idx,
             });
           },
         });
 
-        inheritFromSubmenu.append(item);
+        inheritFromSubmenu.append(layerItem);
+      });
 
-        this.layers.forEach((layer, idx) => {
-          const item = new nw.MenuItem({
-            type: 'checkbox',
-            label: layer.name,
-            checked: this.Layer.inheritFrom === idx,
-            click: function click() {
-              that.setInheritFrom({
-                layerIndex: that.LayerIndex,
-                inheritFrom: idx,
-              });
-            },
-          });
+      const inheritFromItem = new nw.MenuItem({
+        label: 'Inherit From',
+        submenu: inheritFromSubmenu,
+        tooltip: 'The Layer to inherit frames from',
+      });
 
-          inheritFromSubmenu.append(item);
-        });
+      this.menuOptions.menuItems.push(
+        new nw.MenuItem({
+          label: this.name,
+          enabled: false,
+        }),
+        new nw.MenuItem({
+          type: 'separator',
+        }),
+        new nw.MenuItem({
+          type: 'checkbox',
+          label: 'Clearing',
+          tooltip: 'Clear this Layer at the beginning of its draw cycle',
+          checked: this.clearingChecked,
+          click: function click() {
+            that.setClearing({
+              layerIndex: that.LayerIndex,
+              clearing: this.checked,
+            });
+          },
+        }),
+        new nw.MenuItem({
+          type: 'checkbox',
+          label: 'Inherit',
+          tooltip: 'Inherit frames from the \'Inherit From\' Layer',
+          checked: this.inheritChecked,
+          click: function click() {
+            that.setInherit({
+              layerIndex: that.LayerIndex,
+              inherit: this.checked,
+            });
+          },
+        }),
 
-        const inheritFromItem = new nw.MenuItem({
-          label: 'Inherit From',
-          submenu: inheritFromSubmenu,
-          tooltip: 'The Layer to inherit frames from',
-        });
+        inheritFromItem,
 
-        this.menuOptions.menuItems.push(
-          new nw.MenuItem({
-            label: this.name,
-            enabled: false,
-          }),
-          new nw.MenuItem({
-            type: 'separator',
-          }),
-          new nw.MenuItem({
-            type: 'checkbox',
-            label: 'Clearing',
-            tooltip: 'Clear this Layer at the beginning of its draw cycle',
-            checked: this.clearingChecked,
-            click: function click() {
-              that.setClearing({
-                layerIndex: that.LayerIndex,
-                clearing: this.checked,
-              });
-            },
-          }),
-          new nw.MenuItem({
-            type: 'checkbox',
-            label: 'Inherit',
-            tooltip: 'Inherit frames from the \'Inherit From\' Layer',
-            checked: this.inheritChecked,
-            click: function click() {
-              that.setInherit({
-                layerIndex: that.LayerIndex,
-                inherit: this.checked,
-              });
-            },
-          }),
-
-          inheritFromItem,
-
-          new nw.MenuItem({
-            type: 'checkbox',
-            label: 'Pipeline',
-            tooltip: `Modules pass frames directly to the next Module,
+        new nw.MenuItem({
+          type: 'checkbox',
+          label: 'Pipeline',
+          tooltip: `Modules pass frames directly to the next Module,
               bypassing drawing to the Layer until the end Module's draw cycle`
-              .replace(/\s\s+/g, ' '),
-            checked: this.pipelineChecked,
-            click: function click() {
-              that.setPipeline({
-                layerIndex: that.LayerIndex,
-                pipeline: this.checked,
-              });
-            },
-          }),
-          new nw.MenuItem({
-            type: 'checkbox',
-            label: 'Draw To Output',
-            tooltip: 'Draw the Layer to the Output Window(s) at the end of the Layer\'s draw cycle',
-            checked: this.drawToOutputChecked,
-            click: function click() {
-              that.setDrawToOutput({
-                layerIndex: that.LayerIndex,
-                drawToOutput: this.checked,
-              });
-            },
-          }),
-        );
+            .replace(/\s\s+/g, ' '),
+          checked: this.pipelineChecked,
+          click: function click() {
+            that.setPipeline({
+              layerIndex: that.LayerIndex,
+              pipeline: this.checked,
+            });
+          },
+        }),
+        new nw.MenuItem({
+          type: 'checkbox',
+          label: 'Draw To Output',
+          tooltip: 'Draw the Layer to the Output Window(s) at the end of the Layer\'s draw cycle',
+          checked: this.drawToOutputChecked,
+          click: function click() {
+            that.setDrawToOutput({
+              layerIndex: that.LayerIndex,
+              drawToOutput: this.checked,
+            });
+          },
+        }),
+      );
+    },
+  },
+  beforeMount() {
+    this.updateChecked();
+  },
+  watch: {
+    Layer: {
+      handler() {
+        this.updateChecked();
       },
+      deep: true,
     },
-    beforeMount() {
-      this.updateChecked();
-    },
-    watch: {
-      Layer: {
-        handler() {
-          this.updateChecked();
-        },
-        deep: true,
-      },
-    },
-    components: {
-      ActiveModule,
-      draggable,
-    },
-  };
+  },
+  components: {
+    ActiveModule,
+    draggable,
+  },
+};
 </script>
 
 <style scoped lang="scss">

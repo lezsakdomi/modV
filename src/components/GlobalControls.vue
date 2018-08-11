@@ -2,17 +2,30 @@
   <div class="pure-u-1-1 global-controls right-controls">
     <div class="control-group bpm-group">
       <label for="detectBPMGlobal">Detect BPM</label>
-      <input id="detectBPMGlobal" type="checkbox" class="enable" checked="true" v-model='detectBpm'><br>
+      <input
+        class="enable"
+        id="detectBPMGlobal"
+        type="checkbox"
+        checked="true"
+        v-model="detectBpm"
+      ><br>
       <label>BPM Tapper</label>
-      <input id="BPMtapperGlobal" type="button" value="Tap BPM" class="enable pure-button" @click='tempoTap'>
+      <input
+        id="BPMtapperGlobal"
+        type="button"
+        value="Tap BPM"
+        class="enable pure-button"
+        @click="tempoTap"
+      >
       <span id="BPMDisplayGlobal">{{ parseInt(bpm, 10) }}</span>
     </div>
     <div class="control-group audioSource-group">
       <label for="audioSourceGlobal">Set audio input</label>
       <select id="audioSourceGlobal" v-model='audioSource'>
         <option
-          v-for='source in audioSources'
-          :value='source.deviceId'
+          v-for="source in audioSources"
+          :value="source.deviceId"
+          :key="source.deviceId"
         >{{ source.label }}</option>
       </select>
     </div>
@@ -24,8 +37,9 @@
       <label for="videoSourceGlobal">Set video input</label>
       <select id="videoSourceGlobal" v-model='videoSource'>
         <option
-          v-for='source in videoSources'
-          :value='source.deviceId'
+          v-for="source in videoSources"
+          :value="source.deviceId"
+          :key="source.deviceId"
         >{{ source.label }}</option>
       </select>
     </div>
@@ -36,8 +50,14 @@
 
     <div class="control-group set-username-group">
       <label>Set Name</label>
-      <input type="text" id="setUsername" v-model='nameInput' @keypress.enter='saveName'>
-      <input id="setUsernameGlobal" type="button" value="Save Name" class="enable pure-button" @click='saveName'>
+      <input type="text" id="setUsername" v-model="nameInput" @keypress.enter="saveName">
+      <input
+        id="setUsernameGlobal"
+        type="button"
+        value="Save Name"
+        class="enable pure-button"
+        @click="saveName"
+      >
     </div>
 
     <div class="control-group set-mediapath">
@@ -49,151 +69,157 @@
         webkitdirectory="true"
         directory="true"
         nwdirectory="true"
-        @change='mediaPathChanged'
+        @change="mediaPathChanged"
       >
       <label for="selectMediaFolderGlobal" class="pure-button">Select Media Folder</label>
     </div>
 
     <div class="control-group retina-group">
       <label for="retinaGlobal">Use retina resolutions</label>
-      <input id="retinaGlobal" type="checkbox" class="enable" v-model='useRetinaInput'>
+      <input id="retinaGlobal" type="checkbox" class="enable" v-model="useRetinaInput">
     </div>
 
     <div class="control-group constrain-group">
       <label for="constrainGlobal">Constrain output size to 1:1 ratio</label>
-      <input id="constrainGlobal" type="checkbox" class="enable" v-model='constrainToOneOneInput'>
+      <input id="constrainGlobal" type="checkbox" class="enable" v-model="constrainToOneOneInput">
     </div>
 
     <div class="control-group newOutputWindow-group">
       <label for="newOutputWindowGlobal">New output window</label>
-      <input id="newOutputWindowGlobal" type="button" value="Open" class="enable pure-button" @click='createWindow'>
+      <input
+        id="newOutputWindowGlobal"
+        type="button"
+        value="Open"
+        class="enable pure-button"
+        @click="createWindow"
+      >
     </div>
 
     <div class="control-group showStats-group">
       <label for="showStatsGlobal">Show Statistics</label>
-      <input id="showStatsGlobal" type="checkbox" class="enable" v-model='showStatsInput'>
+      <input id="showStatsGlobal" type="checkbox" class="enable" v-model="showStatsInput">
     </div>
   </div>
 </template>
 
 <script>
-  import { mapActions, mapGetters, mapMutations } from 'vuex';
-  import Tt from 'tap-tempo';
+import { mapActions, mapGetters, mapMutations } from 'vuex';
+import Tt from 'tap-tempo';
 
-  const tapTempo = new Tt();
+const tapTempo = new Tt();
 
-  export default {
-    name: 'globalControls',
-    data() {
-      return {
-        audioSource: 'default',
-        videoSource: 'default',
-        detectBpm: true,
-        mediaPathInput: '',
-        nameInput: '',
-        useRetinaInput: true,
-        showStatsInput: false,
-        constrainToOneOneInput: false,
-      };
+export default {
+  name: 'globalControls',
+  data() {
+    return {
+      audioSource: 'default',
+      videoSource: 'default',
+      detectBpm: true,
+      mediaPathInput: '',
+      nameInput: '',
+      useRetinaInput: true,
+      showStatsInput: false,
+      constrainToOneOneInput: false,
+    };
+  },
+  computed: {
+    ...mapGetters('mediaStream', [
+      'audioSources',
+      'videoSources',
+    ]),
+    ...mapGetters('tempo', [
+      'bpm',
+      'detect',
+    ]),
+    ...mapGetters('user', [
+      'mediaPath',
+      'name',
+      'useRetina',
+      'currentAudioSource',
+      'currentVideoSource',
+      'showStats',
+      'constrainToOneOne',
+    ]),
+  },
+  methods: {
+    ...mapActions('tempo', [
+      'setBpm',
+    ]),
+    ...mapMutations('tempo', [
+      'setBpmDetect',
+    ]),
+    ...mapMutations('user', [
+      'setMediaPath',
+      'setName',
+    ]),
+    ...mapActions('user', [
+      'setUseRetina',
+      'setCurrentAudioSource',
+      'setCurrentVideoSource',
+      'setShowStats',
+      'setConstrainToOneOne',
+    ]),
+    ...mapActions('windows', [
+      'createWindow',
+    ]),
+    tempoTap() {
+      tapTempo.tap();
     },
-    computed: {
-      ...mapGetters('mediaStream', [
-        'audioSources',
-        'videoSources',
-      ]),
-      ...mapGetters('tempo', [
-        'bpm',
-        'detect',
-      ]),
-      ...mapGetters('user', [
-        'mediaPath',
-        'name',
-        'useRetina',
-        'currentAudioSource',
-        'currentVideoSource',
-        'showStats',
-        'constrainToOneOne',
-      ]),
+    saveName() {
+      this.setName({ name: this.nameInput });
     },
-    methods: {
-      ...mapActions('tempo', [
-        'setBpm',
-      ]),
-      ...mapMutations('tempo', [
-        'setBpmDetect',
-      ]),
-      ...mapMutations('user', [
-        'setMediaPath',
-        'setName',
-      ]),
-      ...mapActions('user', [
-        'setUseRetina',
-        'setCurrentAudioSource',
-        'setCurrentVideoSource',
-        'setShowStats',
-        'setConstrainToOneOne',
-      ]),
-      ...mapActions('windows', [
-        'createWindow',
-      ]),
-      tempoTap() {
-        tapTempo.tap();
-      },
-      saveName() {
-        this.setName({ name: this.nameInput });
-      },
-      mediaPathChanged(e) {
-        this.mediaPathInput = e.target.value;
-      },
+    mediaPathChanged(e) {
+      this.mediaPathInput = e.target.value;
     },
-    watch: {
-      currentAudioSource() {
-        this.audioSource = this.currentAudioSource;
-      },
-      currentVideoSource() {
-        this.videoSource = this.currentVideoSource;
-      },
-      audioSource() {
-        if (this.audioSource === this.currentAudioSource) return;
-        this.setCurrentAudioSource({ sourceId: this.audioSource });
-      },
-      videoSource() {
-        if (this.videoSource === this.currentVideoSource) return;
-        this.setCurrentVideoSource({ sourceId: this.videoSource });
-      },
-      detect() {
-        this.detectBpm = this.detect;
-      },
-      detectBpm() {
-        this.setBpmDetect({ detect: this.detectBpm });
-      },
-      mediaFolderInput() {
-        this.setMediaPath({ path: this.mediaFolderInput });
-      },
-      useRetinaInput() {
-        this.setUseRetina({ useRetina: this.useRetinaInput });
-      },
-      showStatsInput() {
-        this.setShowStats(this.showStatsInput);
-      },
-      constrainToOneOneInput() {
-        this.setConstrainToOneOne(this.constrainToOneOneInput);
-      },
+  },
+  watch: {
+    currentAudioSource() {
+      this.audioSource = this.currentAudioSource;
     },
-    created() {
-      tapTempo.on('tempo', (bpm) => {
-        if (this.bpm === Math.round(bpm)) return;
-        this.setBpm({ bpm: Math.round(bpm) });
-      });
+    currentVideoSource() {
+      this.videoSource = this.currentVideoSource;
+    },
+    audioSource() {
+      if (this.audioSource === this.currentAudioSource) return;
+      this.setCurrentAudioSource({ sourceId: this.audioSource });
+    },
+    videoSource() {
+      if (this.videoSource === this.currentVideoSource) return;
+      this.setCurrentVideoSource({ sourceId: this.videoSource });
+    },
+    detect() {
+      this.detectBpm = this.detect;
+    },
+    detectBpm() {
+      this.setBpmDetect({ detect: this.detectBpm });
+    },
+    mediaFolderInput() {
+      this.setMediaPath({ path: this.mediaFolderInput });
+    },
+    useRetinaInput() {
+      this.setUseRetina({ useRetina: this.useRetinaInput });
+    },
+    showStatsInput() {
+      this.setShowStats(this.showStatsInput);
+    },
+    constrainToOneOneInput() {
+      this.setConstrainToOneOne(this.constrainToOneOneInput);
+    },
+  },
+  created() {
+    tapTempo.on('tempo', (bpm) => {
+      if (this.bpm === Math.round(bpm)) return;
+      this.setBpm({ bpm: Math.round(bpm) });
+    });
 
-      this.nameInput = this.name;
-      this.useRetinaInput = this.useRetina;
-      this.audioSource = this.currentAudioSource || 'default';
-      this.videoSource = this.currentVideoSource || 'default';
-      this.showStatsInput = this.showStats;
-      this.constrainToOneOneInput = this.constrainToOneOne;
-    },
-  };
+    this.nameInput = this.name;
+    this.useRetinaInput = this.useRetina;
+    this.audioSource = this.currentAudioSource || 'default';
+    this.videoSource = this.currentVideoSource || 'default';
+    this.showStatsInput = this.showStats;
+    this.constrainToOneOneInput = this.constrainToOneOne;
+  },
+};
 </script>
 
 <style scoped>

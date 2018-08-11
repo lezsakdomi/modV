@@ -6,7 +6,7 @@
     </button>
 
     <b-dropdown-item
-      v-for="data, idx in selectData"
+      v-for="(data, idx) in selectData"
       :key="idx"
       :value="data.value"
     >{{ data.label | capitalize }}</b-dropdown-item>
@@ -14,52 +14,52 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex';
+import { mapGetters } from 'vuex';
 
-  export default {
-    name: 'paletteSelector',
-    props: [
-      'value',
-      'project',
-    ],
-    data() {
-      return {
-        currentPalette: null,
-      };
-    },
-    computed: {
-      ...mapGetters('projects', [
-        'allProjects',
-      ]),
-      selectData() {
-        const data = [];
-        const allProjects = this.allProjects;
+export default {
+  name: 'paletteSelector',
+  props: [
+    'value',
+    'project',
+  ],
+  data() {
+    return {
+      currentPalette: null,
+    };
+  },
+  computed: {
+    ...mapGetters('projects', [
+      'allProjects',
+    ]),
+    selectData() {
+      const data = [];
+      const allProjects = this.allProjects;
 
-        if (!Object.prototype.hasOwnProperty.call(allProjects, this.project)) return [];
-        const project = allProjects[this.project];
+      if (!Object.prototype.hasOwnProperty.call(allProjects, this.project)) return [];
+      const project = allProjects[this.project];
 
-        Object.keys(project.palettes).forEach((paletteName) => {
-          data.push({
-            label: paletteName,
-            value: paletteName,
-          });
+      Object.keys(project.palettes).forEach((paletteName) => {
+        data.push({
+          label: paletteName,
+          value: paletteName,
         });
+      });
 
-        data.sort((a, b) => {
-          if (a.label < b.label) return -1;
-          if (a.label > b.label) return 1;
-          return 0;
-        });
+      data.sort((a, b) => {
+        if (a.label < b.label) return -1;
+        if (a.label > b.label) return 1;
+        return 0;
+      });
 
-        return data;
-      },
+      return data;
     },
-    watch: {
-      currentPalette() {
-        this.$emit('input', this.currentPalette);
-      },
+  },
+  watch: {
+    currentPalette() {
+      this.$emit('input', this.currentPalette);
     },
-  };
+  },
+};
 </script>
 
 <style lang='scss'>

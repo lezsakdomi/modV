@@ -103,7 +103,12 @@ const mutations = {
     Vue.set(state, 'width', width);
     Vue.set(state, 'height', height);
   },
-  setPreviewValues(state, { width, height, x, y }) {
+  setPreviewValues(state, {
+    width,
+    height,
+    x,
+    y,
+  }) {
     Vue.set(state, 'previewWidth', width);
     Vue.set(state, 'previewHeight', height);
     Vue.set(state, 'previewX', x);

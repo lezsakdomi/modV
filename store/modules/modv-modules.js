@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Ajv from 'ajv/lib/ajv';
-import { modV } from '@/modv';
+import { modV } from 'modv';
 import cloneDeep from 'lodash.clonedeep';
 import getNextName from '@/utils/get-next-name';
 import { setup as shaderSetup } from '@/modv/renderers/shader';
@@ -67,7 +67,12 @@ const actions = {
     commit('addModuleToRegistry', { name: data.meta.name, data });
   },
 
-  async createActiveModule({ commit, state }, { moduleName, appendToName, skipInit, enabled }) {
+  async createActiveModule({ commit, state }, {
+    moduleName,
+    appendToName,
+    skipInit,
+    enabled,
+  }) {
     return new Promise(async (resolve) => {
       const existingModuleData = outerState.registry[moduleName];
       if (!existingModuleData) return;
@@ -136,9 +141,7 @@ const actions = {
 
       if ('audioFeatures' in newModuleData.meta) {
         if (Array.isArray(newModuleData.meta.audioFeatures)) {
-          newModuleData.meta.audioFeatures.forEach(feature =>
-            store.commit('meyda/addFeature', { feature }),
-          );
+          newModuleData.meta.audioFeatures.forEach(feature => store.commit('meyda/addFeature', { feature }));
         }
       }
 
@@ -366,9 +369,7 @@ const actions = {
       moduleData[moduleName].meta = Object.assign(Module.meta, moduleData[moduleName].meta);
 
       if (!('saveData' in Module.meta)) {
-        console.warn(
-          `generatePreset: Module ${Module.meta.name} has no saveData schema, falling back to Vuex store data`,
-        );
+        console.warn(`generatePreset: Module ${Module.meta.name} has no saveData schema, falling back to Vuex store data`);
         return;
       }
 

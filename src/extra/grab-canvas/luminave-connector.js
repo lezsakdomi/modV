@@ -110,7 +110,7 @@ export default class LuminaveConnector {
 
   /**
    * Send data to WebSocket if connection is established
-   * @param {Array} data 
+   * @param {Array} data
    */
   send(data) {
     // Connection is established
@@ -233,5 +233,4 @@ export default class LuminaveConnector {
 
     return colors;
   }
-
 }

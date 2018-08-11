@@ -35,6 +35,7 @@
       <div
         class="column is-12 preset-container"
         v-for="(preset, presetName) in project"
+        :key="presetName"
       >
         <div class="columns cannot-load" v-if="!validateModuleRequirements(preset.moduleData)">
 
@@ -74,107 +75,107 @@
 </template>
 
 <script>
-  import { mapActions, mapGetters } from 'vuex';
-  import naturalSort from '@/modv/utils/natural-sort';
+import { mapActions, mapGetters } from 'vuex';
+import naturalSort from '@/modv/utils/natural-sort';
 
-  export default {
-    name: 'presetGallery',
-    data() {
-      return {
-        loading: null,
+export default {
+  name: 'presetGallery',
+  data() {
+    return {
+      loading: null,
 
-        nameError: false,
-        nameErrorMessage: 'Preset must have a name',
+      nameError: false,
+      nameErrorMessage: 'Preset must have a name',
 
-        projectError: false,
-        projectErrorMessage: 'Please select a project',
+      projectError: false,
+      projectErrorMessage: 'Please select a project',
 
-        newPresetName: '',
-        newPresetProject: 'default',
-      };
+      newPresetName: '',
+      newPresetProject: 'default',
+    };
+  },
+  props: {
+    phrase: {
+      type: String,
+      required: true,
+      default: '',
     },
-    props: {
-      phrase: {
-        type: String,
-        required: true,
-        default: '',
-      },
+  },
+  computed: {
+    ...mapGetters('projects', [
+      'currentProject',
+    ]),
+    ...mapGetters('modVModules', [
+      'registry',
+    ]),
+    currentProjectName() {
+      return this.$store.state.projects.currentProject;
     },
-    computed: {
-      ...mapGetters('projects', [
-        'currentProject',
-      ]),
-      ...mapGetters('modVModules', [
-        'registry',
-      ]),
-      currentProjectName() {
-        return this.$store.state.projects.currentProject;
-      },
-      project() {
-        const data = [];
-        if (!this.currentProject) return data;
+    project() {
+      const data = [];
+      if (!this.currentProject) return data;
 
-        Object.keys(this.currentProject.presets)
-          .sort(naturalSort.compare)
-          .forEach((presetName) => {
-            data.push(this.currentProject.presets[presetName]);
-          });
-
-        return data;
-      },
-    },
-    methods: {
-      ...mapActions('projects', [
-        'loadPresetFromProject',
-        'savePresetToProject',
-      ]),
-      search(textIn, termIn) {
-        const text = textIn.toLowerCase().trim();
-        const term = termIn.toLowerCase().trim();
-        if (termIn.length < 1) return true;
-
-        return text.indexOf(term) > -1;
-      },
-      makeStyle(rgb) {
-        return {
-          backgroundColor: `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`,
-        };
-      },
-      validateModuleRequirements(moduleData) {
-        return Object.keys(moduleData)
-          .map(datumKey => moduleData[datumKey].originalModuleName)
-          .every(moduleName => Object.keys(this.registry).indexOf(moduleName) < 0);
-      },
-      async loadPreset({ presetName }) {
-        const projectName = this.currentProjectName;
-        this.loading = `${projectName}.${presetName}`;
-
-        await this.loadPresetFromProject({ presetName, projectName });
-        this.loading = null;
-      },
-      async savePreset() {
-        this.nameError = false;
-        this.projectError = false;
-
-        if (!this.newPresetName.trim().length) {
-          this.nameError = true;
-          return;
-        }
-
-        if (!this.newPresetProject.trim().length) {
-          this.projectError = true;
-          return;
-        }
-
-        await this.savePresetToProject({
-          presetName: this.newPresetName,
-          projectName: this.currentProjectName,
+      Object.keys(this.currentProject.presets)
+        .sort(naturalSort.compare)
+        .forEach((presetName) => {
+          data.push(this.currentProject.presets[presetName]);
         });
 
-        this.newPresetName = '';
-      },
+      return data;
     },
-  };
+  },
+  methods: {
+    ...mapActions('projects', [
+      'loadPresetFromProject',
+      'savePresetToProject',
+    ]),
+    search(textIn, termIn) {
+      const text = textIn.toLowerCase().trim();
+      const term = termIn.toLowerCase().trim();
+      if (termIn.length < 1) return true;
+
+      return text.indexOf(term) > -1;
+    },
+    makeStyle(rgb) {
+      return {
+        backgroundColor: `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`,
+      };
+    },
+    validateModuleRequirements(moduleData) {
+      return Object.keys(moduleData)
+        .map(datumKey => moduleData[datumKey].originalModuleName)
+        .every(moduleName => Object.keys(this.registry).indexOf(moduleName) < 0);
+    },
+    async loadPreset({ presetName }) {
+      const projectName = this.currentProjectName;
+      this.loading = `${projectName}.${presetName}`;
+
+      await this.loadPresetFromProject({ presetName, projectName });
+      this.loading = null;
+    },
+    async savePreset() {
+      this.nameError = false;
+      this.projectError = false;
+
+      if (!this.newPresetName.trim().length) {
+        this.nameError = true;
+        return;
+      }
+
+      if (!this.newPresetProject.trim().length) {
+        this.projectError = true;
+        return;
+      }
+
+      await this.savePresetToProject({
+        presetName: this.newPresetName,
+        projectName: this.currentProjectName,
+      });
+
+      this.newPresetName = '';
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>

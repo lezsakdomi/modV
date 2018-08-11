@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { modV } from '@/modv';
+import { modV } from 'modv';
 
 const state = {
   palettes: {},
@@ -12,7 +12,14 @@ const getters = {
 
 // actions
 const actions = {
-  createPalette({ commit, state }, { id, colors, duration, moduleName, returnFormat, variable }) {
+  createPalette({ commit, state }, {
+    id,
+    colors,
+    duration,
+    moduleName,
+    returnFormat,
+    variable,
+  }) {
     return new Promise((resolve) => {
       if (id in state.palettes === true) resolve(state.palettes[id]);
 
@@ -23,7 +30,14 @@ const actions = {
       if (duration) durationPassed = duration;
 
       modV.workers.palette.createPalette(id, colorsPassed, durationPassed, returnFormat);
-      commit('addPalette', { id, colors, duration, moduleName, variable, returnFormat });
+      commit('addPalette', {
+        id,
+        colors,
+        duration,
+        moduleName,
+        variable,
+        returnFormat,
+      });
       resolve(state.palettes[id]);
     });
   },
@@ -93,7 +107,15 @@ const actions = {
 
 // mutations
 const mutations = {
-  addPalette(state, { id, colors, duration, useBpm, bpmDivision, moduleName, variable }) {
+  addPalette(state, {
+    id,
+    colors,
+    duration,
+    useBpm,
+    bpmDivision,
+    moduleName,
+    variable,
+  }) {
     if (id in state.palettes === false) {
       Vue.set(state.palettes, id, {
         bpmDivision: bpmDivision || 16,

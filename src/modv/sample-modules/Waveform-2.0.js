@@ -47,7 +47,9 @@ export default {
     maxHeight: 75,
   },
 
-  draw({ canvas, context, features, meyda }) {
+  draw({
+    canvas, context, features, meyda,
+  }) {
     const { width, height } = canvas;
     const bufferLength = features.buffer.length;
     const buffer = meyda.windowing(features.buffer, this.windowing);

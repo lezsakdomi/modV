@@ -6,7 +6,7 @@
     </button>
 
     <b-dropdown-item
-      v-for="name, idx in projectNames"
+      v-for="(name, idx) in projectNames"
       :key="idx"
       :value="name.value"
     >{{ name.label }}</b-dropdown-item>
@@ -14,43 +14,43 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex';
+import { mapGetters } from 'vuex';
 
-  export default {
-    name: 'projectSelector',
-    props: [
-      'value',
-    ],
-    data() {
-      return {
-        currentProject: 'default',
-      };
-    },
-    computed: {
-      ...mapGetters('projects', [
-        'allProjects',
-      ]),
-      projectNames() {
-        const data = [];
-        const allProjects = this.allProjects;
+export default {
+  name: 'projectSelector',
+  props: [
+    'value',
+  ],
+  data() {
+    return {
+      currentProject: 'default',
+    };
+  },
+  computed: {
+    ...mapGetters('projects', [
+      'allProjects',
+    ]),
+    projectNames() {
+      const data = [];
+      const allProjects = this.allProjects;
 
-        Object.keys(allProjects).forEach((projectName) => {
-          data.push({
-            label: projectName,
-            value: projectName,
-            selected: this.currentProject === projectName,
-          });
+      Object.keys(allProjects).forEach((projectName) => {
+        data.push({
+          label: projectName,
+          value: projectName,
+          selected: this.currentProject === projectName,
         });
+      });
 
-        return data;
-      },
+      return data;
     },
-    watch: {
-      currentProject() {
-        this.$emit('input', this.currentProject);
-      },
+  },
+  watch: {
+    currentProject() {
+      this.$emit('input', this.currentProject);
     },
-  };
+  },
+};
 </script>
 
 <style lang='scss'>

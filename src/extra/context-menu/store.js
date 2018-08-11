@@ -55,7 +55,9 @@ const mutations = {
     Vue.set(state.menus[id], 'y', y);
     Vue.set(state.menus[id], 'visible', true);
   },
-  editItemProperty(state, { id, index, property, value }) {
+  editItemProperty(state, {
+    id, index, property, value,
+  }) {
     Vue.set(state.menus[id].items[index], property, value);
   },
   addHook(state, { hookName, hook }) {

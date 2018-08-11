@@ -10,6 +10,7 @@
             <div
               class="column is-12"
               v-for="projectName in Object.keys($store.state.projects.projects)"
+              :key="projectName"
             >
 
               <div class="columns">

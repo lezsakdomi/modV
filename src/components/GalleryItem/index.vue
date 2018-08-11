@@ -24,140 +24,140 @@
 </template>
 
 <script>
-  import { mapActions, mapGetters } from 'vuex';
-  import { modV } from '@/modv';
+import { mapActions, mapGetters } from 'vuex';
+import { modV } from '@/modv';
 
-  export default {
-    name: 'galleryItem',
-    data() {
-      return {
-        canvas: false,
-        context: false,
-        Module: false,
-        raf: false,
-        appendToName: '-gallery',
-        isIsf: false,
-      };
-    },
-    props: [
-      'moduleName',
-    ],
-    mounted() {
-      this.canvas = this.$refs.canvas;
-      this.context = this.canvas.getContext('2d');
+export default {
+  name: 'galleryItem',
+  data() {
+    return {
+      canvas: false,
+      context: false,
+      Module: false,
+      raf: false,
+      appendToName: '-gallery',
+      isIsf: false,
+    };
+  },
+  props: [
+    'moduleName',
+  ],
+  mounted() {
+    this.canvas = this.$refs.canvas;
+    this.context = this.canvas.getContext('2d');
 
-      this.createActiveModule({
-        moduleName: this.moduleName,
-        appendToName: this.appendToName,
-        skipInit: true,
-      }).then((Module) => {
-        this.Module = Module;
-        if (Module.meta.type === 'isf') {
-          this.isIsf = true;
-        }
+    this.createActiveModule({
+      moduleName: this.moduleName,
+      appendToName: this.appendToName,
+      skipInit: true,
+    }).then((Module) => {
+      this.Module = Module;
+      if (Module.meta.type === 'isf') {
+        this.isIsf = true;
+      }
 
-        if ('init' in Module) {
-          Module.init({
-            canvas: { width: this.canvas.width, height: this.canvas.height },
-          });
-        }
+      if ('init' in Module) {
+        Module.init({
+          canvas: { width: this.canvas.width, height: this.canvas.height },
+        });
+      }
 
-        if ('resize' in Module) {
-          Module.resize({
-            canvas: { width: this.canvas.width, height: this.canvas.height },
-          });
-        }
-      }).catch((e) => {
-        console.log(`An error occoured whilst initialising a gallery module - ${this.Module.meta.name}`);
-        console.error(e);
+      if ('resize' in Module) {
+        Module.resize({
+          canvas: { width: this.canvas.width, height: this.canvas.height },
+        });
+      }
+    }).catch((e) => {
+      console.log(`An error occoured whilst initialising a gallery module - ${this.Module.meta.name}`);
+      console.error(e);
+    });
+  },
+  methods: {
+    ...mapActions('layers', [
+      'addModuleToLayer',
+    ]),
+    ...mapActions('modVModules', [
+      'createActiveModule',
+    ]),
+    draw(delta) {
+      this.raf = requestAnimationFrame(this.draw);
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      const features = this.$modV.meyda.get(this.$modV.audioFeatures);
+
+      if (this.Module.meta.previewWithOutput) {
+        this.context.drawImage(
+          modV.outputCanvas,
+          0,
+          0,
+          this.canvas.width,
+          this.canvas.height,
+        );
+      }
+
+      this.Module.draw({
+        Module: this.Module,
+        canvas: this.canvas,
+        context: this.context,
+        video: this.$modV.videoStream,
+        features,
+        delta,
+          meyda: modV.meyda._m, //eslint-disable-line
       });
     },
-    methods: {
-      ...mapActions('layers', [
-        'addModuleToLayer',
-      ]),
-      ...mapActions('modVModules', [
-        'createActiveModule',
-      ]),
-      draw(delta) {
-        this.raf = requestAnimationFrame(this.draw);
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        const features = this.$modV.meyda.get(this.$modV.audioFeatures);
-
-        if (this.Module.meta.previewWithOutput) {
-          this.context.drawImage(
-            modV.outputCanvas,
-            0,
-            0,
-            this.canvas.width,
-            this.canvas.height,
-          );
-        }
-
-        this.Module.draw({
-          Module: this.Module,
-          canvas: this.canvas,
-          context: this.context,
-          video: this.$modV.videoStream,
-          features,
-          delta,
-          meyda: modV.meyda._m, //eslint-disable-line
-        });
-      },
-      mouseover() {
-        if (this.raf) return;
-        this.raf = requestAnimationFrame(this.draw);
-        // webgl.resize(this.canvas.width, this.canvas.height);
-      },
-      mouseout() {
-        cancelAnimationFrame(this.raf);
-        this.raf = false;
-      },
-      doubleclick() {
-        this.createActiveModule({
-          moduleName: this.moduleName,
-          skipInit: false,
-        }).then((Module) => {
-          this.addModuleToLayer({
-            module: Module,
-            layerIndex: this.focusedLayerIndex,
-          });
-        });
-      },
-      dragstart(e) {
-        e.dataTransfer.setData('module-name', this.Module.meta.name);
-      },
+    mouseover() {
+      if (this.raf) return;
+      this.raf = requestAnimationFrame(this.draw);
+      // webgl.resize(this.canvas.width, this.canvas.height);
     },
-    computed: {
-      ...mapGetters('layers', [
-        'focusedLayerIndex',
-      ]),
-      name() {
-        const Module = this.Module;
-        if (!Module) return '';
-        return Module.meta.originalName;
-      },
-      credit() {
-        if (!this.Module) return '';
-        return this.Module.meta.author;
-      },
-      version() {
-        if (!this.Module) return '';
-        return this.Module.meta.version;
-      },
-      isfVersion() {
-        if (!this.Module) return '';
-        if (!this.isIsf) return 'N/A';
-        let outputString = `${this.Module.meta.isfVersion}`;
-        if (this.Module.meta.isfVersion === 1) outputString += ' (auto upgraded to 2)';
-        return outputString;
-      },
-      description() {
-        if (!this.Module) return '';
-        return this.Module.meta.description;
-      },
+    mouseout() {
+      cancelAnimationFrame(this.raf);
+      this.raf = false;
     },
-  };
+    doubleclick() {
+      this.createActiveModule({
+        moduleName: this.moduleName,
+        skipInit: false,
+      }).then((Module) => {
+        this.addModuleToLayer({
+          module: Module,
+          layerIndex: this.focusedLayerIndex,
+        });
+      });
+    },
+    dragstart(e) {
+      e.dataTransfer.setData('module-name', this.Module.meta.name);
+    },
+  },
+  computed: {
+    ...mapGetters('layers', [
+      'focusedLayerIndex',
+    ]),
+    name() {
+      const Module = this.Module;
+      if (!Module) return '';
+      return Module.meta.originalName;
+    },
+    credit() {
+      if (!this.Module) return '';
+      return this.Module.meta.author;
+    },
+    version() {
+      if (!this.Module) return '';
+      return this.Module.meta.version;
+    },
+    isfVersion() {
+      if (!this.Module) return '';
+      if (!this.isIsf) return 'N/A';
+      let outputString = `${this.Module.meta.isfVersion}`;
+      if (this.Module.meta.isfVersion === 1) outputString += ' (auto upgraded to 2)';
+      return outputString;
+    },
+    description() {
+      if (!this.Module) return '';
+      return this.Module.meta.description;
+    },
+  },
+};
 </script>
 
 <style lang='scss' scoped>

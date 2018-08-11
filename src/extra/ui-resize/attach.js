@@ -12,9 +12,7 @@ export default function attachResizeHandles() {
     const vuebarContainers = document.querySelectorAll('.vb');
 
     // @todo - this will eventually break.
-    vuebarContainers.forEach(
-      element => window.modVVue.$vuebar.refreshScrollbar(element),
-    );
+    vuebarContainers.forEach(element => window.modVVue.$vuebar.refreshScrollbar(element));
   });
   attachResizeLeft(document.querySelector('.resize-handle-left'));
 }

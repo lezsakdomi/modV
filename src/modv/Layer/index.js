@@ -140,7 +140,8 @@ class Layer extends EventEmitter2 {
       layer: Module.getLayer()
     }); */
 
-    this.emit('moduleAdd',
+    this.emit(
+      'moduleAdd',
       moduleName,
       order,
     );
@@ -171,7 +172,8 @@ class Layer extends EventEmitter2 {
       });
     }
 
-    this.emit('moduleRemove',
+    this.emit(
+      'moduleRemove',
       Module,
       index,
     );
@@ -218,7 +220,8 @@ class Layer extends EventEmitter2 {
       }
     }
 
-    this.emit('moduleReorder',
+    this.emit(
+      'moduleReorder',
       moduleName,
       order,
     );
@@ -247,7 +250,8 @@ class Layer extends EventEmitter2 {
   toggle() {
     this.enabled = !this.enabled;
 
-    this.emit('enabled',
+    this.emit(
+      'enabled',
       this.enabled,
     );
 
@@ -264,7 +268,8 @@ class Layer extends EventEmitter2 {
 
     this.name = name;
 
-    this.emit('nameChange',
+    this.emit(
+      'nameChange',
       name,
     );
 
@@ -325,9 +330,7 @@ class Layer extends EventEmitter2 {
             this.moduleListNode.replaceChild(activeItemNode, clone);
           } catch (e) {
             // fail gracefully, remove clone in gallery
-            const clone = evt.clone;
-            clone.parentNode.removeChild(clone);
-
+            evt.clone.removeChild(clone);
             return;
           }
 
@@ -351,18 +354,18 @@ class Layer extends EventEmitter2 {
           const oldIndex = Module.getLayer();
           const newIndex = modV.layers.indexOf(this);
 
-          const Layer = modV.layers[oldIndex];
+          const layer = modV.layers[oldIndex];
 
-          // Layer = old layer
-          // this.Layer = new layer
+          // layer = old layer
+          // this.layer = new layer
 
-          this.modules[name] = Layer.modules[name];
+          this.modules[name] = layer.modules[name];
 
           Module.setLayer(modV.layers.indexOf(this));
 
           this.setOrder(Module, evt.newIndex, true);
 
-          Layer.removeModule(Module, true);
+          layer.removeModule(Module, true);
 
           modV.remote.update('moduleLayerMove', {
             oldLayerIndex: oldIndex,

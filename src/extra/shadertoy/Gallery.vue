@@ -5,6 +5,7 @@
       <li
         class="is-light"
         v-for="result in results"
+        :key="result.info.name"
         @click="makeModule(result)"
       >{{ result.info.name }}</li>
     </ul>
@@ -12,63 +13,61 @@
 </template>
 
 <script>
-  import { modV } from '@/modv';
-  import axios from 'axios';
+import { modV } from '@/modv';
+import axios from 'axios';
 
-  const appKey = 'rt8KwW';
-  const url = 'https://www.shadertoy.com/api/v1';
+const appKey = 'rt8KwW';
+const url = 'https://www.shadertoy.com/api/v1';
 
-  function getShaders(shaderIds) {
-    const promises = [];
+function getShaders(shaderIds) {
+  const promises = [];
 
-    shaderIds.forEach((id) => {
-      promises.push(
-        axios.get(`${url}/shaders/${id}`, {
-          params: {
-            key: appKey,
-          },
-        }),
-      );
-    });
-
-    return Promise.all(promises);
-  }
-
-  export default {
-    name: 'ShadertoyGallery',
-    data() {
-      return {
-        results: [],
-      };
-    },
-    methods: {
-      async search(e) {
-        axios.get(`${url}/shaders/query/${e.target.value}`, {
-          params: {
-            key: appKey,
-          },
-        })
-          .then(response => getShaders(response.data.Results))
-          .then((shaders) => {
-            this.results = shaders
-              .map(response => response.data.Shader)
-              .filter(shader => shader.renderpass.length < 2);
-          });
+  shaderIds.forEach((id) => {
+    promises.push(axios.get(`${url}/shaders/${id}`, {
+      params: {
+        key: appKey,
       },
-      makeModule(result) {
-        const code = result.renderpass[0].code;
+    }));
+  });
 
-        modV.register({
-          meta: {
-            name: result.info.name,
-            author: result.info.username,
-            version: 0.1,
-            uniforms: {},
-            type: 'shader',
-          },
-          fragmentShader: code,
+  return Promise.all(promises);
+}
+
+export default {
+  name: 'ShadertoyGallery',
+  data() {
+    return {
+      results: [],
+    };
+  },
+  methods: {
+    async search(e) {
+      axios.get(`${url}/shaders/query/${e.target.value}`, {
+        params: {
+          key: appKey,
+        },
+      })
+        .then(response => getShaders(response.data.Results))
+        .then((shaders) => {
+          this.results = shaders
+            .map(response => response.data.Shader)
+            .filter(shader => shader.renderpass.length < 2);
         });
-      },
     },
-  };
+    makeModule(result) {
+      const code = result.renderpass[0].code;
+
+      modV.register({
+        meta: {
+          name: result.info.name,
+          author: result.info.username,
+          version: 0.1,
+          uniforms: {},
+          type: 'shader',
+        },
+        fragmentShader: code,
+      });
+    },
+  },
+};
 </script>

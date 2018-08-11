@@ -9,7 +9,7 @@
       <button @click="addNewScopeItem" class="button">Add item to scope</button>
       <ul>
         <scope-item
-          v-for="addition, key in additionalScope"
+          v-for="(addition, key) in additionalScope"
           :contents="addition"
           :name="key"
           :key="key"
@@ -27,86 +27,37 @@
 </template>
 
 <script>
-  import { mapActions, mapGetters } from 'vuex';
-  import scopeItem from './ScopeItem';
+import { mapActions, mapGetters } from 'vuex';
+import scopeItem from './ScopeItem';
 
-  export default {
-    name: 'expression',
-    props: [],
-    data() {
-      return {
-        expression: 'value',
-      };
+export default {
+  name: 'expression',
+  props: [],
+  data() {
+    return {
+      expression: 'value',
+    };
+  },
+  computed: {
+    ...mapGetters('expression', {
+      activeControlData: 'activeControlData',
+      getAssignment: 'assignment',
+    }),
+    moduleName() {
+      return this.activeControlData.moduleName;
     },
-    computed: {
-      ...mapGetters('expression', {
-        activeControlData: 'activeControlData',
-        getAssignment: 'assignment',
-      }),
-      moduleName() {
-        return this.activeControlData.moduleName;
-      },
-      controlVariable() {
-        return this.activeControlData.controlVariable;
-      },
-      assignment() {
-        return this.getAssignment(this.moduleName, this.controlVariable) || false;
-      },
-      additionalScope: {
-        get() {
-          if (!this.assignment) return {};
-          return this.assignment.additionalScope;
-        },
-        set(expression) {
-          this.addExpression({
-            expression,
-            moduleName: this.moduleName,
-            controlVariable: this.controlVariable,
-          });
-        },
-      },
+    controlVariable() {
+      return this.activeControlData.controlVariable;
     },
-    created() {
-      this.expression = this.assignment.expression || 'value';
+    assignment() {
+      return this.getAssignment(this.moduleName, this.controlVariable) || false;
     },
-    methods: {
-      ...mapActions('expression', [
-        'addExpression',
-        'addToScope',
-        'renameScopeItem',
-        'updateScopeItem',
-      ]),
-      addNewScopeItem() {
-        const scopeAdditions = {};
-        scopeAdditions.newItem = 'function a(x) { return x * 2 }';
-        this.addToScope({
-          moduleName: this.moduleName,
-          controlVariable: this.controlVariable,
-          scopeAdditions,
-        });
+    additionalScope: {
+      get() {
+        if (!this.assignment) return {};
+        return this.assignment.additionalScope;
       },
-      updateScopeItemName(oldName, newName) {
-        this.renameScopeItem({
-          oldName,
-          newName,
-          moduleName: this.moduleName,
-          controlVariable: this.controlVariable,
-        });
-      },
-      updateScopeItemContents(name, contents) {
-        this.updateScopeItem({
-          name,
-          contents,
-          moduleName: this.moduleName,
-          controlVariable: this.controlVariable,
-        });
-      },
-    },
-    components: {
-      scopeItem,
-    },
-    watch: {
-      expression(expression) {
+      set(expression) {
         this.addExpression({
           expression,
           moduleName: this.moduleName,
@@ -114,7 +65,56 @@
         });
       },
     },
-  };
+  },
+  created() {
+    this.expression = this.assignment.expression || 'value';
+  },
+  methods: {
+    ...mapActions('expression', [
+      'addExpression',
+      'addToScope',
+      'renameScopeItem',
+      'updateScopeItem',
+    ]),
+    addNewScopeItem() {
+      const scopeAdditions = {};
+      scopeAdditions.newItem = 'function a(x) { return x * 2 }';
+      this.addToScope({
+        moduleName: this.moduleName,
+        controlVariable: this.controlVariable,
+        scopeAdditions,
+      });
+    },
+    updateScopeItemName(oldName, newName) {
+      this.renameScopeItem({
+        oldName,
+        newName,
+        moduleName: this.moduleName,
+        controlVariable: this.controlVariable,
+      });
+    },
+    updateScopeItemContents(name, contents) {
+      this.updateScopeItem({
+        name,
+        contents,
+        moduleName: this.moduleName,
+        controlVariable: this.controlVariable,
+      });
+    },
+  },
+  components: {
+    scopeItem,
+  },
+  watch: {
+    expression(expression) {
+      this.addExpression({
+        expression,
+        moduleName: this.moduleName,
+        controlVariable: this.controlVariable,
+      });
+    },
+  },
+};
 </script>
 
 <style lang="scss">

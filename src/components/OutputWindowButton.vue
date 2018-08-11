@@ -6,21 +6,21 @@
 </template>
 
 <script>
-  import { mapActions } from 'vuex';
+import { mapActions } from 'vuex';
 
-  export default {
-    name: 'outputWindowButton',
-    data() {
-      return {
-        msg: 'Welcome to Your Vue.js App',
-      };
-    },
-    methods: {
-      ...mapActions('windows', [
-        'createWindow',
-      ]),
-    },
-  };
+export default {
+  name: 'outputWindowButton',
+  data() {
+    return {
+      msg: 'Welcome to Your Vue.js App',
+    };
+  },
+  methods: {
+    ...mapActions('windows', [
+      'createWindow',
+    ]),
+  },
+};
 </script>
 
 <style scoped lang='scss'>

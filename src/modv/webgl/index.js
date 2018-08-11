@@ -1,7 +1,9 @@
 import createREGL from 'regl';
 import defaultShader from './default-shader';
 
-function setupWebGl(modV) {
+function setupWebGl(modVIn) {
+  const modV = modVIn;
+
   const canvas = document.createElement('canvas');
   const gl = canvas.getContext('webgl2', {
     premultipliedAlpha: false,

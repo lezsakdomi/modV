@@ -48,54 +48,54 @@
 </template>
 
 <script>
-  import CanvasPreview from '@/components/CanvasPreview';
-  import ControlPanelHandler from '@/components/ControlPanelHandler';
-  import Gallery from '@/components/Gallery';
-  import GlobalControls from '@/components/GlobalControls';
-  import LayerControls from '@/components/LayerControls';
-  import LayerMenu from '@/components/LayerMenu';
-  import List from '@/components/List';
-  import SideMenu from '@/components/SideMenu';
-  import StatusBar from '@/components/StatusBar';
-  import Tabs from '@/components/Tabs';
+import CanvasPreview from '@/components/CanvasPreview';
+import ControlPanelHandler from '@/components/ControlPanelHandler';
+import Gallery from '@/components/Gallery';
+import GlobalControls from '@/components/GlobalControls';
+import LayerControls from '@/components/LayerControls';
+import LayerMenu from '@/components/LayerMenu';
+import List from '@/components/List';
+import SideMenu from '@/components/SideMenu';
+import StatusBar from '@/components/StatusBar';
+import Tabs from '@/components/Tabs';
 
-  import { mapGetters } from 'vuex';
+import { mapGetters } from 'vuex';
 
-  export default {
-    name: 'app',
-    data() {
-      return {
-        menuOpen: false,
-      };
+export default {
+  name: 'app',
+  data() {
+    return {
+      menuOpen: false,
+    };
+  },
+  computed: {
+    ...mapGetters('plugins', [
+      'enabledPlugins',
+    ]),
+    pluginComponents() {
+      return this.enabledPlugins
+        .filter(plugin => 'component' in plugin.plugin)
+        .map(plugin => plugin.plugin.component.name);
     },
-    computed: {
-      ...mapGetters('plugins', [
-        'enabledPlugins',
-      ]),
-      pluginComponents() {
-        return this.enabledPlugins
-          .filter(plugin => 'component' in plugin.plugin)
-          .map(plugin => plugin.plugin.component.name);
-      },
+  },
+  methods: {
+    menuIconClicked() {
+      this.$data.menuOpen = !this.$data.menuOpen;
     },
-    methods: {
-      menuIconClicked() {
-        this.$data.menuOpen = !this.$data.menuOpen;
-      },
-    },
-    components: {
-      CanvasPreview,
-      ControlPanelHandler,
-      Gallery,
-      GlobalControls,
-      LayerControls,
-      LayerMenu,
-      List,
-      SideMenu,
-      StatusBar,
-      Tabs,
-    },
-  };
+  },
+  components: {
+    CanvasPreview,
+    ControlPanelHandler,
+    Gallery,
+    GlobalControls,
+    LayerControls,
+    LayerMenu,
+    List,
+    SideMenu,
+    StatusBar,
+    Tabs,
+  },
+};
 </script>
 
 <style lang="scss">

@@ -8,7 +8,8 @@
       <b-field>
         <b-radio-button v-model="expressionFunction"
           :native-value="waveform"
-          v-for="waveform, idx in lfoTypes"
+          v-for="waveform in lfoTypes"
+          :key="waveform"
         >
           <img :src="`@/../static/graphics/icons/${waveform}.svg`" class="icon">
           <span>&nbsp;{{ waveform | capitalize }}</span>
@@ -25,63 +26,63 @@
 </template>
 
 <script>
-  import { mapGetters, mapMutations } from 'vuex';
-  import lfoTypes from './lfo-types';
+import { mapGetters, mapMutations } from 'vuex';
+import lfoTypes from './lfo-types';
 
-  export default {
-    name: 'expression',
-    props: [],
-    data() {
-      return {
-        lfoTypes: [],
-        expressionFunction: 'sine',
-        frequency: 0.01,
-        useBpm: true,
-      };
+export default {
+  name: 'expression',
+  props: [],
+  data() {
+    return {
+      lfoTypes: [],
+      expressionFunction: 'sine',
+      frequency: 0.01,
+      useBpm: true,
+    };
+  },
+  created() {
+    this.lfoTypes = this.lfoTypes.concat(lfoTypes);
+    console.log(this.assignment);
+    this.expressionFunction = this.assignment.waveform;
+  },
+  computed: {
+    ...mapGetters('lfo', {
+      activeControlData: 'activeControlData',
+      getAssignment: 'assignment',
+    }),
+    moduleName() {
+      return this.activeControlData.moduleName;
     },
-    created() {
-      this.lfoTypes = this.lfoTypes.concat(lfoTypes);
-      console.log(this.assignment);
-      this.expressionFunction = this.assignment.waveform;
+    controlVariable() {
+      return this.activeControlData.controlVariable;
     },
-    computed: {
-      ...mapGetters('lfo', {
-        activeControlData: 'activeControlData',
-        getAssignment: 'assignment',
-      }),
-      moduleName() {
-        return this.activeControlData.moduleName;
-      },
-      controlVariable() {
-        return this.activeControlData.controlVariable;
-      },
-      assignment() {
-        const { moduleName, controlVariable } = this;
-        return this.getAssignment({ moduleName, controlVariable });
-      },
+    assignment() {
+      const { moduleName, controlVariable } = this;
+      return this.getAssignment({ moduleName, controlVariable });
     },
-    methods: {
-      ...mapMutations('lfo', [
-        'setLfoFunction',
-        'setLfoFrequency',
-        'setUseBpm',
-      ]),
+  },
+  methods: {
+    ...mapMutations('lfo', [
+      'setLfoFunction',
+      'setLfoFrequency',
+      'setUseBpm',
+    ]),
+  },
+  watch: {
+    expressionFunction() {
+      const { moduleName, controlVariable, expressionFunction } = this;
+      this.setLfoFunction({ moduleName, controlVariable, expressionFunction });
     },
-    watch: {
-      expressionFunction() {
-        const { moduleName, controlVariable, expressionFunction } = this;
-        this.setLfoFunction({ moduleName, controlVariable, expressionFunction });
-      },
-      frequency() {
-        const { moduleName, controlVariable, frequency } = this;
-        this.setLfoFrequency({ moduleName, controlVariable, frequency });
-      },
-      useBpm() {
-        const { moduleName, controlVariable, useBpm } = this;
-        this.setUseBpm({ moduleName, controlVariable, useBpm });
-      },
+    frequency() {
+      const { moduleName, controlVariable, frequency } = this;
+      this.setLfoFrequency({ moduleName, controlVariable, frequency });
     },
-  };
+    useBpm() {
+      const { moduleName, controlVariable, useBpm } = this;
+      this.setUseBpm({ moduleName, controlVariable, useBpm });
+    },
+  },
+};
 </script>
 
 <style lang="scss">

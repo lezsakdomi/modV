@@ -1,14 +1,19 @@
 <template>
   <div class="palette-gallery columns is-gapless is-multiline">
     <div class="column is-12">
-      <span v-for="(project, projectName) in projects">
+      <span v-for="(project, projectName) in projects" :key="projectName">
         <h2 class="title">{{ projectName }}</h2>
         <div class="columns is-gapless is-multiline">
-          <div class="column is-12 palette-container" v-for="(palette, paletteName) in project.palettes">
+          <div
+            class="column is-12 palette-container"
+            v-for="(palette, paletteName) in project.palettes"
+            :key="paletteName"
+          >
             <p class="has-text-light">{{ paletteName }}</p>
             <div
               class="swatch"
-              v-for="rgb in palette"
+              v-for="(rgb, idx) in palette"
+              :key="idx"
               :style="makeStyle(rgb)"
             ></div>
           </div>
@@ -19,40 +24,40 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex';
+import { mapGetters } from 'vuex';
 
-  export default {
-    name: 'paletteGallery',
-    components: {
+export default {
+  name: 'paletteGallery',
+  components: {
 
+  },
+  props: {
+    phrase: {
+      type: String,
+      required: true,
+      default: '',
     },
-    props: {
-      phrase: {
-        type: String,
-        required: true,
-        default: '',
-      },
-    },
-    computed: {
-      ...mapGetters('projects', {
-        projects: 'allProjects',
-      }),
-    },
-    methods: {
-      search(textIn, termIn) {
-        const text = textIn.toLowerCase().trim();
-        const term = termIn.toLowerCase().trim();
-        if (termIn.length < 1) return true;
+  },
+  computed: {
+    ...mapGetters('projects', {
+      projects: 'allProjects',
+    }),
+  },
+  methods: {
+    search(textIn, termIn) {
+      const text = textIn.toLowerCase().trim();
+      const term = termIn.toLowerCase().trim();
+      if (termIn.length < 1) return true;
 
-        return text.indexOf(term) > -1;
-      },
-      makeStyle(rgb) {
-        return {
-          backgroundColor: `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`,
-        };
-      },
+      return text.indexOf(term) > -1;
     },
-  };
+    makeStyle(rgb) {
+      return {
+        backgroundColor: `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`,
+      };
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>

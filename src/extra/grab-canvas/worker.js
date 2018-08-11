@@ -19,7 +19,9 @@ onmessage = (e) => {
     }
 
     case 'setupCanvas': {
-      const { width, height, selectionX, selectionY } = message.payload;
+      const {
+        width, height, selectionX, selectionY,
+      } = message.payload;
 
       luminaveConnector.width = width;
       luminaveConnector.height = height;
@@ -46,7 +48,7 @@ onmessage = (e) => {
         // Stop an old reconnect because the plugin is not active
         luminaveConnector.stopReconnect();
       }
-      
+
       break;
     }
 

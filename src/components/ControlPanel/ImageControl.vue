@@ -9,6 +9,7 @@
         Source:
         <div
           v-for="sourceName in sources"
+          :key="sourceName"
           class="field"
         >
           <b-radio
@@ -28,7 +29,7 @@
           </button>
 
           <b-dropdown-item
-            v-for="data, idx in layerNames"
+            v-for="(data, idx) in layerNames"
             :key="idx"
             :value="data.value"
           >{{ data.label | capitalize }}</b-dropdown-item>
@@ -39,96 +40,96 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex';
+import { mapGetters } from 'vuex';
 
-  export default {
-    name: 'imageControl',
-    props: [
-      'meta',
-    ],
-    data() {
-      return {
-        currentLayerIndex: -1,
-        source: 'layer',
-        sources: [
-          'layer',
-          'image',
-          'video',
-        ],
-      };
-    },
-    computed: {
-      ...mapGetters('layers', {
-        layers: 'allLayers',
-      }),
-      layerNames() {
-        const data = [];
-        const allLayers = this.layers;
+export default {
+  name: 'imageControl',
+  props: [
+    'meta',
+  ],
+  data() {
+    return {
+      currentLayerIndex: -1,
+      source: 'layer',
+      sources: [
+        'layer',
+        'image',
+        'video',
+      ],
+    };
+  },
+  computed: {
+    ...mapGetters('layers', {
+      layers: 'allLayers',
+    }),
+    layerNames() {
+      const data = [];
+      const allLayers = this.layers;
 
-        if (allLayers.length < 1) return data;
+      if (allLayers.length < 1) return data;
 
+      data.push({
+        label: 'Inherit',
+        value: -1,
+        selected: typeof this.currentLayerIndex === 'undefined',
+      });
+
+      allLayers.forEach((Layer, idx) => {
+        const name = Layer.name;
         data.push({
-          label: 'Inherit',
-          value: -1,
-          selected: typeof this.currentLayerIndex === 'undefined',
+          label: name,
+          value: idx,
+          selected: this.currentLayerIndex === idx,
         });
+      });
 
-        allLayers.forEach((Layer, idx) => {
-          const name = Layer.name;
-          data.push({
-            label: name,
-            value: idx,
-            selected: this.currentLayerIndex === idx,
-          });
+      return data;
+    },
+    value: {
+      get() {
+        return this.$store.state.modVModules.active[this.moduleName][this.variable];
+      },
+      set(value) {
+        this.$store.dispatch('modVModules/updateProp', {
+          name: this.moduleName,
+          prop: this.variable,
+          data: {
+            source: this.source,
+            sourceData: value,
+          },
         });
-
-        return data;
-      },
-      value: {
-        get() {
-          return this.$store.state.modVModules.active[this.moduleName][this.variable];
-        },
-        set(value) {
-          this.$store.dispatch('modVModules/updateProp', {
-            name: this.moduleName,
-            prop: this.variable,
-            data: {
-              source: this.source,
-              sourceData: value,
-            },
-          });
-        },
-      },
-      variable() {
-        return this.meta.$modv_variable;
-      },
-      label() {
-        return this.meta.label || this.variable;
-      },
-      moduleName() {
-        return this.meta.$modv_moduleName;
-      },
-      currentLayer() {
-        return this.layers[this.currentLayerIndex];
-      },
-      inputId() {
-        return `${this.moduleName}-${this.variable}`;
-      },
-      selectedLabel() {
-        return this.currentLayerIndex < 0 ? 'Inherit' : this.layers[this.currentLayerIndex].name;
       },
     },
-    mounted() {
-      if (this.value && this.value.sourceData) {
-        this.currentLayerIndex = this.value.sourceData;
-      }
+    variable() {
+      return this.meta.$modv_variable;
     },
-    watch: {
-      currentLayerIndex(value) {
-        this.value = value;
-      },
+    label() {
+      return this.meta.label || this.variable;
     },
-  };
+    moduleName() {
+      return this.meta.$modv_moduleName;
+    },
+    currentLayer() {
+      return this.layers[this.currentLayerIndex];
+    },
+    inputId() {
+      return `${this.moduleName}-${this.variable}`;
+    },
+    selectedLabel() {
+      return this.currentLayerIndex < 0 ? 'Inherit' : this.layers[this.currentLayerIndex].name;
+    },
+  },
+  mounted() {
+    if (this.value && this.value.sourceData) {
+      this.currentLayerIndex = this.value.sourceData;
+    }
+  },
+  watch: {
+    currentLayerIndex(value) {
+      this.value = value;
+    },
+  },
+};
 </script>
 
 <style scoped>

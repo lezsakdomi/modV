@@ -13,27 +13,27 @@
 </template>
 
 <script>
-  export default {
-    name: 'opacityControl',
-    props: [
-      'moduleName',
-    ],
-    computed: {
-      alpha: {
-        get() {
-          if (!this.moduleName) return 0;
-          return this.$store.state.modVModules.active[this.moduleName].meta.alpha;
-        },
-        set(value) {
-          this.$store.dispatch('modVModules/updateMeta', {
-            name: this.moduleName,
-            metaKey: 'alpha',
-            data: value,
-          });
-        },
+export default {
+  name: 'opacityControl',
+  props: [
+    'moduleName',
+  ],
+  computed: {
+    alpha: {
+      get() {
+        if (!this.moduleName) return 0;
+        return this.$store.state.modVModules.active[this.moduleName].meta.alpha;
+      },
+      set(value) {
+        this.$store.dispatch('modVModules/updateMeta', {
+          name: this.moduleName,
+          metaKey: 'alpha',
+          data: value,
+        });
       },
     },
-  };
+  },
+};
 </script>
 
 <style>

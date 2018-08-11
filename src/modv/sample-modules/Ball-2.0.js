@@ -61,7 +61,9 @@ export default {
     },
 
     color: {
-      default: { r: 255, g: 104, b: 163, a: 1 },
+      default: {
+        r: 255, g: 104, b: 163, a: 1,
+      },
       // explicitly define a control
       control: {
         type: 'paletteControl',
@@ -70,9 +72,15 @@ export default {
         options: {
           returnFormat: 'rgbaString',
           colors: [
-            { r: 255, g: 255, b: 255, a: 1 },
-            { r: 0, g: 0, b: 0, a: 1 },
-            { r: 255, g: 0, b: 0, a: 0.5 },
+            {
+              r: 255, g: 255, b: 255, a: 1,
+            },
+            {
+              r: 0, g: 0, b: 0, a: 1,
+            },
+            {
+              r: 255, g: 0, b: 0, a: 0.5,
+            },
           ],
           duration: 1000,
         },

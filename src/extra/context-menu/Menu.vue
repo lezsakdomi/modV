@@ -2,9 +2,8 @@
   <keep-alive>
     <transition name="fade">
       <ul class="nwjs-menu contextmenu" ref="menu" v-if="visible">
-        <component
-          is="contextMenuItem"
-          v-for="item, idx in items"
+        <context-menu-item
+          v-for="(item, idx) in items"
           :key="idx"
           :options="item"
           :parentOptions="options"
@@ -12,112 +11,112 @@
           :parentOffsetHeight="offsetHeight"
           :parentPosition="{ x: options.x, y: options.y }"
           :index="idx"
-        ></component>
+        />
       </ul>
     </transition>
   </keep-alive>
 </template>
 
 <script>
-  import { mapActions } from 'vuex';
-  import contextMenuItem from './MenuItem';
-  import isDescendant from './is-descendant';
+import { mapActions } from 'vuex';
+import contextMenuItem from './MenuItem';
+import isDescendant from './is-descendant';
 
-  export default {
-    name: 'contextMenu',
-    props: [
-      'options',
-    ],
-    data() {
-      return {
-        offsetWidth: 0,
-        offsetHeight: 0,
-      };
+export default {
+  name: 'contextMenu',
+  props: [
+    'options',
+  ],
+  data() {
+    return {
+      offsetWidth: 0,
+      offsetHeight: 0,
+    };
+  },
+  computed: {
+    items() {
+      return this.options.items;
     },
-    computed: {
-      items() {
-        return this.options.items;
-      },
-      visible() {
-        return this.options.visible;
-      },
-      isSubmenu() {
-        return this.options.isSubmenu;
-      },
-      id() {
-        return this.options.$id;
-      },
+    visible() {
+      return this.options.visible;
     },
-    methods: {
-      ...mapActions('contextMenu', [
-        'popdownAll',
-      ]),
-      checkIfClickedMenu(e) {
-        e.preventDefault();
-        if (
-          !e.target === this.$refs.menu || !isDescendant(this.$refs.menu, e.target)
-        ) {
-          this.popdownAll();
-        }
-      },
-      reposition() {
-        const menuEl = this.$refs.menu;
-        this.$data.offsetWidth = menuEl.offsetWidth;
-        this.$data.offsetHeight = menuEl.offsetHeight;
-
-        let setRight = false;
-
-        let x = this.options.x;
-        let y = this.options.y;
-
-        const width = menuEl.clientWidth;
-        const height = menuEl.clientHeight;
-
-        if ((x + width) > window.innerWidth) {
-          setRight = true;
-          if (this.isSubmenu) {
-            const node = this.parentMenu.node;
-            x = (node.offsetWidth + ((window.innerWidth - node.offsetLeft) - node.offsetWidth)) - 2;
-          } else {
-            x = 0;
-          }
-        }
-
-        if ((y + height) > window.innerHeight) {
-          y = window.innerHeight - height;
-        }
-
-        if (!setRight) {
-          menuEl.style.left = `${x}px`;
-          menuEl.style.right = 'auto';
-        } else {
-          menuEl.style.right = `${x}px`;
-          menuEl.style.left = 'auto';
-        }
-
-        menuEl.style.top = `${y}px`;
-      },
+    isSubmenu() {
+      return this.options.isSubmenu;
     },
-    beforeMount() {
-      if (!this.isSubmenu) {
-        this.popdownAll([this.id]);
+    id() {
+      return this.options.$id;
+    },
+  },
+  methods: {
+    ...mapActions('contextMenu', [
+      'popdownAll',
+    ]),
+    checkIfClickedMenu(e) {
+      e.preventDefault();
+      if (
+        !e.target === this.$refs.menu || !isDescendant(this.$refs.menu, e.target)
+      ) {
+        this.popdownAll();
       }
     },
-    mounted() {
-      this.reposition();
+    reposition() {
+      const menuEl = this.$refs.menu;
+      this.$data.offsetWidth = menuEl.offsetWidth;
+      this.$data.offsetHeight = menuEl.offsetHeight;
 
-      window.addEventListener('click', this.checkIfClickedMenu);
+      let setRight = false;
+
+      let x = this.options.x;
+      let y = this.options.y;
+
+      const width = menuEl.clientWidth;
+      const height = menuEl.clientHeight;
+
+      if ((x + width) > window.innerWidth) {
+        setRight = true;
+        if (this.isSubmenu) {
+          const node = this.parentMenu.node;
+          x = (node.offsetWidth + ((window.innerWidth - node.offsetLeft) - node.offsetWidth)) - 2;
+        } else {
+          x = 0;
+        }
+      }
+
+      if ((y + height) > window.innerHeight) {
+        y = window.innerHeight - height;
+      }
+
+      if (!setRight) {
+        menuEl.style.left = `${x}px`;
+        menuEl.style.right = 'auto';
+      } else {
+        menuEl.style.right = `${x}px`;
+        menuEl.style.left = 'auto';
+      }
+
+      menuEl.style.top = `${y}px`;
     },
-    updated() {
-      this.reposition();
-    },
-    beforeDestroy() {
-      window.removeEventListener('click', this.checkIfClickedMenu);
-    },
-    components: {
-      contextMenuItem,
-    },
-  };
+  },
+  beforeMount() {
+    if (!this.isSubmenu) {
+      this.popdownAll([this.id]);
+    }
+  },
+  mounted() {
+    this.reposition();
+
+    window.addEventListener('click', this.checkIfClickedMenu);
+  },
+  updated() {
+    this.reposition();
+  },
+  beforeDestroy() {
+    window.removeEventListener('click', this.checkIfClickedMenu);
+  },
+  components: {
+    contextMenuItem,
+  },
+};
 </script>
 
 <style lang='scss'>
@@ -316,7 +315,9 @@
     border-radius: 0;
   }
 
-  .contextmenu .menu-item.normal:hover, .contextmenu .menu-item.checkbox:hover, .menu-item.normal.submenu-active {
+  .contextmenu .menu-item.normal:hover,
+  .contextmenu .menu-item.checkbox:hover,
+  .menu-item.normal.submenu-active {
       background-color: orange;
   }
 </style>

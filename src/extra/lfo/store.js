@@ -24,7 +24,9 @@ const getters = {
 };
 
 const actions = {
-  addAssignment({ commit }, { moduleName, controlVariable, waveform, frequency }) {
+  addAssignment({ commit }, {
+    moduleName, controlVariable, waveform, frequency,
+  }) {
     const Module = store.state.modVModules.active[moduleName];
     if (!Module) return;
     if (typeof Module.props[controlVariable] === 'undefined') return;

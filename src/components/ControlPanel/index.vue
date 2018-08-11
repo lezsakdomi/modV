@@ -24,129 +24,129 @@
 </template>
 
 <script>
-  import { mapGetters, mapMutations } from 'vuex';
-  import colorControl from './ColorControl';
-  import checkboxControl from './CheckboxControl';
-  import imageControl from './ImageControl';
-  import paletteControl from './PaletteControl';
-  import rangeControl from './RangeControl';
-  import selectControl from './SelectControl';
-  import textControl from './TextControl';
-  import twoDPointControl from './TwoDPointControl';
+import { mapGetters, mapMutations } from 'vuex';
+import colorControl from './ColorControl';
+import checkboxControl from './CheckboxControl';
+import imageControl from './ImageControl';
+import paletteControl from './PaletteControl';
+import rangeControl from './RangeControl';
+import selectControl from './SelectControl';
+import textControl from './TextControl';
+import twoDPointControl from './TwoDPointControl';
 
-  export default {
-    name: 'controlPanel',
-    props: {
-      moduleName: String,
-      pinned: { default: false },
-      focused: { type: Boolean, default: false },
+export default {
+  name: 'controlPanel',
+  props: {
+    moduleName: String,
+    pinned: { default: false },
+    focused: { type: Boolean, default: false },
+  },
+  computed: {
+    ...mapGetters('modVModules', [
+      'getActiveModule',
+    ]),
+    module() {
+      if (!this.moduleName) return false;
+      return this.$store.getters['modVModules/outerActive'][this.moduleName];
     },
-    computed: {
-      ...mapGetters('modVModules', [
-        'getActiveModule',
-      ]),
-      module() {
-        if (!this.moduleName) return false;
-        return this.$store.getters['modVModules/outerActive'][this.moduleName];
-      },
-      name() {
-        if (!this.module) return '';
-        return this.module.meta.name;
-      },
-      controls() {
-        const controls = [];
-        const { module } = this;
-
-        if (module) {
-          Object.keys(module.props).forEach((key) => {
-            const propData = module.props[key];
-            propData.$modv_variable = key;
-            propData.$modv_moduleName = module.meta.name;
-
-            const type = propData.type;
-            const control = propData.control;
-
-            if (control) {
-              controls.push({
-                component: control.type,
-                meta: propData,
-              });
-            }
-
-            if (type === 'int' || type === 'float') {
-              controls.push({
-                component: 'rangeControl',
-                meta: propData,
-              });
-            }
-
-            if (type === 'bool') {
-              controls.push({
-                component: 'checkboxControl',
-                meta: propData,
-              });
-            }
-
-            if (type === 'string') {
-              controls.push({
-                component: 'textControl',
-                meta: propData,
-              });
-            }
-
-            if (type === 'vec2') {
-              controls.push({
-                component: 'twoDPointControl',
-                meta: propData,
-              });
-            }
-
-            if (type === 'enum') {
-              controls.push({
-                component: 'selectControl',
-                meta: propData,
-              });
-            }
-
-            if (type === 'texture') {
-              controls.push({
-                component: 'imageControl',
-                meta: propData,
-              });
-            }
-          });
-        }
-
-        return controls;
-      },
-      pinTitle() {
-        return this.pinned ? 'Unpin' : 'Pin';
-      },
+    name() {
+      if (!this.module) return '';
+      return this.module.meta.name;
     },
-    methods: {
-      ...mapMutations('controlPanels', [
-        'pinPanel',
-        'unpinPanel',
-      ]),
-      pin() {
-        if (!this.pinned) {
-          this.pinPanel({ moduleName: this.name });
-        } else {
-          this.unpinPanel({ moduleName: this.name });
-        }
-      },
+    controls() {
+      const controls = [];
+      const { module } = this;
+
+      if (module) {
+        Object.keys(module.props).forEach((key) => {
+          const propData = module.props[key];
+          propData.$modv_variable = key;
+          propData.$modv_moduleName = module.meta.name;
+
+          const type = propData.type;
+          const control = propData.control;
+
+          if (control) {
+            controls.push({
+              component: control.type,
+              meta: propData,
+            });
+          }
+
+          if (type === 'int' || type === 'float') {
+            controls.push({
+              component: 'rangeControl',
+              meta: propData,
+            });
+          }
+
+          if (type === 'bool') {
+            controls.push({
+              component: 'checkboxControl',
+              meta: propData,
+            });
+          }
+
+          if (type === 'string') {
+            controls.push({
+              component: 'textControl',
+              meta: propData,
+            });
+          }
+
+          if (type === 'vec2') {
+            controls.push({
+              component: 'twoDPointControl',
+              meta: propData,
+            });
+          }
+
+          if (type === 'enum') {
+            controls.push({
+              component: 'selectControl',
+              meta: propData,
+            });
+          }
+
+          if (type === 'texture') {
+            controls.push({
+              component: 'imageControl',
+              meta: propData,
+            });
+          }
+        });
+      }
+
+      return controls;
     },
-    components: {
-      colorControl,
-      checkboxControl,
-      imageControl,
-      paletteControl,
-      rangeControl,
-      selectControl,
-      textControl,
-      twoDPointControl,
+    pinTitle() {
+      return this.pinned ? 'Unpin' : 'Pin';
     },
-  };
+  },
+  methods: {
+    ...mapMutations('controlPanels', [
+      'pinPanel',
+      'unpinPanel',
+    ]),
+    pin() {
+      if (!this.pinned) {
+        this.pinPanel({ moduleName: this.name });
+      } else {
+        this.unpinPanel({ moduleName: this.name });
+      }
+    },
+  },
+  components: {
+    colorControl,
+    checkboxControl,
+    imageControl,
+    paletteControl,
+    rangeControl,
+    selectControl,
+    textControl,
+    twoDPointControl,
+  },
+};
 </script>
 
 <style lang="scss">

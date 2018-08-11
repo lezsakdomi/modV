@@ -93,10 +93,12 @@ class WindowController {
         return;
       }
 
-      const width = resizeQueue.width;
-      const height = resizeQueue.height;
-      const dpr = resizeQueue.dpr;
-      const emit = resizeQueue.emit;
+      const {
+        width,
+        height,
+        dpr,
+        emit,
+      } = resizeQueue;
 
       this.canvas.width = width * dpr;
       this.canvas.height = height * dpr;

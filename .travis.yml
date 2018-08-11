@@ -1,9 +1,0 @@
-language: node_js
-node_js:
-  - '9'
-sudo: false
-script: npm run build
-before_install:
-  - sudo dpkg --add-architecture i386
-  - sudo apt-get update
-  - sudo apt-get install wine

@@ -23,40 +23,40 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex';
-  import GalleryItem from '@/components/GalleryItem';
+import { mapGetters } from 'vuex';
+import GalleryItem from '@/components/GalleryItem';
 
-  export default {
-    name: 'searchBar',
-    data() {
-      return {
-        phrase: '',
-      };
+export default {
+  name: 'searchBar',
+  data() {
+    return {
+      phrase: '',
+    };
+  },
+  computed: mapGetters({
+    modules: 'registeredModules',
+  }),
+  components: {
+    GalleryItem,
+  },
+  methods: {
+    focus() {
+      // nothing here, but seems to be required for shortkey
     },
-    computed: mapGetters({
-      modules: 'registeredModules',
-    }),
-    components: {
-      GalleryItem,
+    clearSearch() {
+      if (this.$refs['gallery-search'] !== document.activeElement) return;
+      this.phrase = '';
     },
-    methods: {
-      focus() {
-        // nothing here, but seems to be required for shortkey
-      },
-      clearSearch() {
-        if (this.$refs['gallery-search'] !== document.activeElement) return;
-        this.phrase = '';
-      },
-      menuIconClicked() {
-        this.$emit('menuIconClicked');
-      },
+    menuIconClicked() {
+      this.$emit('menuIconClicked');
     },
-    watch: {
-      phrase() {
-        this.$emit('update:phrase', this.phrase);
-      },
+  },
+  watch: {
+    phrase() {
+      this.$emit('update:phrase', this.phrase);
     },
-  };
+  },
+};
 </script>
 
 <style scoped lang='scss'>

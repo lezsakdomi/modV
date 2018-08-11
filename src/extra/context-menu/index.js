@@ -1,4 +1,3 @@
-import store from '@/../store';
 import { Menu } from 'nwjs-menu-browser';
 // import '@/../node_modules/nwjs-menu-browser/nwjs-menu-browser.css';
 import contextMenuStore from './store';
@@ -34,7 +33,7 @@ function buildMenu(e, id, options, vnode, store) {
 
   options.menuItems.forEach((item, idx) => menu.insert(item, idx));
 
-  const moduleName = vnode.context.moduleName;
+  const { moduleName } = vnode.context;
   const controlVariable = vnode.context.variable;
 
   const hooks = store.getters['contextMenu/hooks'];
@@ -63,7 +62,10 @@ function buildMenu(e, id, options, vnode, store) {
   menus.push(menu);
   menus = menus.concat(searchForSubMenus(menu));
 
-  menus.forEach(menu => store.commit('contextMenu/addMenu', { Menu: menu, id: menu.$id }));
+  menus.forEach(menuIter => store.commit('contextMenu/addMenu', {
+    Menu: menuIter,
+    id: menuIter.$id,
+  }));
 
   store.dispatch('contextMenu/popup', { id, x: e.x, y: e.y });
   return false;

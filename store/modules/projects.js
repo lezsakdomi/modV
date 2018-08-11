@@ -184,7 +184,15 @@ const actions = {
 
 // mutations
 const mutations = {
-  addProject(state, { projectName, images, palettes, presets, videos, modules, plugins }) {
+  addProject(state, {
+    projectName,
+    images,
+    palettes,
+    presets,
+    videos,
+    modules,
+    plugins,
+  }) {
     const project = {};
     project.images = images || {};
     project.palettes = palettes || {};

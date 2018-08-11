@@ -16,9 +16,7 @@ const getters = {
 
   plugins: state => state.plugins,
 
-  pluginsWithGalleryTab: state => Object.keys(state.plugins).filter(
-      pluginName => ('galleryTabComponent' in state.plugins[pluginName].plugin),
-    )
+  pluginsWithGalleryTab: state => Object.keys(state.plugins).filter(pluginName => ('galleryTabComponent' in state.plugins[pluginName].plugin))
     .reduce((obj, pluginName) => {
       obj[pluginName] = state.plugins[pluginName];
       return obj;

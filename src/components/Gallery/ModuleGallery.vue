@@ -120,52 +120,52 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex';
-  import draggable from 'vuedraggable';
+import { mapGetters } from 'vuex';
+import draggable from 'vuedraggable';
 
-  import GalleryItem from '@/components/GalleryItem';
+import GalleryItem from '@/components/GalleryItem';
 
-  export default {
-    name: 'moduleGallery',
-    components: {
-      draggable,
-      GalleryItem,
+export default {
+  name: 'moduleGallery',
+  components: {
+    draggable,
+    GalleryItem,
+  },
+  props: {
+    phrase: {
+      type: String,
+      required: true,
+      default: '',
     },
-    props: {
-      phrase: {
-        type: String,
-        required: true,
-        default: '',
-      },
+  },
+  computed: {
+    ...mapGetters('modVModules', {
+      currentDragged: 'currentDragged',
+      modules: 'registry',
+    }),
+    moduleShader() {
+      return Object.keys(this.modules)
+        .filter(key => this.modules[key].meta.type === 'shader');
     },
-    computed: {
-      ...mapGetters('modVModules', {
-        currentDragged: 'currentDragged',
-        modules: 'registry',
-      }),
-      moduleShader() {
-        return Object.keys(this.modules)
-          .filter(key => this.modules[key].meta.type === 'shader');
-      },
-      module2d() {
-        return Object.keys(this.modules)
-          .filter(key => this.modules[key].meta.type === '2d');
-      },
-      moduleIsf() {
-        return Object.keys(this.modules)
-          .filter(key => this.modules[key].meta.type === 'isf');
-      },
+    module2d() {
+      return Object.keys(this.modules)
+        .filter(key => this.modules[key].meta.type === '2d');
     },
-    methods: {
-      search(textIn, termIn) {
-        const text = textIn.toLowerCase().trim();
-        const term = termIn.toLowerCase().trim();
-        if (termIn.length < 1) return true;
+    moduleIsf() {
+      return Object.keys(this.modules)
+        .filter(key => this.modules[key].meta.type === 'isf');
+    },
+  },
+  methods: {
+    search(textIn, termIn) {
+      const text = textIn.toLowerCase().trim();
+      const term = termIn.toLowerCase().trim();
+      if (termIn.length < 1) return true;
 
-        return text.indexOf(term) > -1;
-      },
+      return text.indexOf(term) > -1;
     },
-  };
+  },
+};
 </script>
 
 <style lang="scss" scoped>

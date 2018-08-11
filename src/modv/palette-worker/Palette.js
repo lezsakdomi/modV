@@ -45,7 +45,9 @@ function calculateStep(colors, currentColor, currentTime, timePeriod) {
   const g = Math.round((1.0 - p) * g1 + p * g2 + 0.5); // eslint-disable-line
   const b = Math.round((1.0 - p) * b1 + p * b2 + 0.5); // eslint-disable-line
 
-  return { r, g, b, a: 1 };
+  return {
+    r, g, b, a: 1,
+  };
 }
 
 function hexToRgb(hex) {

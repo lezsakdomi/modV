@@ -4,9 +4,17 @@ import ci from 'correcting-interval';
 import Palette from './Palette';
 import { forIn } from '../utils';
 
+const debug = process.env.NODE_ENV !== 'production';
+let interval = 1000 / 60;
+if (debug) {
+  console.warn(`modV: Palette updates are restricted to once every 10 seconds as NODE_ENV is set to "${process.env.NODE_ENV}".`);
+  interval = 10 * 1000;
+}
+
+
 let timer;
 const palettes = new Map();
-self.palettes = palettes;
+self.palettes = palettes; //eslint-disable-line
 
 function createPalette(colors, duration, id) {
   const pal = new Palette(colors, duration, id);
@@ -65,8 +73,8 @@ onmessage = function onmessage(e) {
   }
 
   if (e.data.message === 'start-loop') {
-    if (timer === undefined) ci.setCorrectingInterval(loop, 1000 / 60);
+    if (timer === undefined) ci.setCorrectingInterval(loop, interval);
   }
 };
 
-if (timer === undefined) ci.setCorrectingInterval(loop, 1000 / 60);
+if (timer === undefined) ci.setCorrectingInterval(loop, interval);

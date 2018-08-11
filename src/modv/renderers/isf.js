@@ -5,7 +5,9 @@ import {
   Upgrader as ISFUpgrader,
 } from 'interactive-shader-format-for-modv';
 
-function render({ Module, canvas, context, pipeline }) {
+function render({
+  Module, canvas, context, pipeline,
+}) {
   if (Module.inputs) {
     Module.inputs.forEach((input) => {
       if (input.TYPE === 'image') {
@@ -97,8 +99,7 @@ function setup(Module) {
               label: input.LABELS[idx],
               value,
               selected: (value === input.DEFAULT),
-            }),
-            ),
+            })),
         });
         break;
 

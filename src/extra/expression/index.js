@@ -34,7 +34,9 @@ const Expression = {
     return menuItem;
   },
 
-  processValue({ delta, currentValue, moduleName, controlVariable }) {
+  processValue({
+    delta, currentValue, moduleName, controlVariable,
+  }) {
     let value = currentValue;
 
     const assignment = store.getters['expression/assignment'](moduleName, controlVariable);

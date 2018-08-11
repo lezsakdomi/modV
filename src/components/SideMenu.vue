@@ -5,19 +5,19 @@
 </template>
 
 <script>
-  import GlobalControls from '@/components/GlobalControls';
+import GlobalControls from '@/components/GlobalControls';
 
-  export default {
-    name: 'side-menu',
-    props: {
-      menuState: {
-        default: false,
-      },
+export default {
+  name: 'side-menu',
+  props: {
+    menuState: {
+      default: false,
     },
-    components: {
-      GlobalControls,
-    },
-  };
+  },
+  components: {
+    GlobalControls,
+  },
+};
 </script>
 
 <style scoped lang='scss'>
