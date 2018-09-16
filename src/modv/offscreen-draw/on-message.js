@@ -119,7 +119,8 @@ export default async function onmessage(e) {
     case 'modVModules/addModuleToActive': {
       const { canvas } = getOutputCanvas();
 
-      const { name } = payload;
+      const name = payload.data.meta.originalName || payload.name;
+
       const existingModuleData = state.registry[name];
       if (!existingModuleData) return;
 
@@ -184,8 +185,8 @@ export default async function onmessage(e) {
         });
       }
 
-      state.active[name] = newModuleData;
-      state.layers[0].moduleOrder.push(name);
+      state.active[payload.name || payload.data.meta.originalName] = newModuleData;
+      state.layers[0].moduleOrder.push(payload.name || payload.data.meta.originalName);
 
       if ('init' in newModuleData) {
         newModuleData.init({ canvas });
@@ -195,6 +196,20 @@ export default async function onmessage(e) {
         newModuleData.resize({ canvas });
       }
 
+      break;
+    }
+
+    case 'modVModules/removeActiveModule': {
+      const { moduleName } = payload;
+
+      delete state.active[moduleName];
+      break;
+    }
+
+    case 'layers/removeLayer': {
+      const { layerIndex } = payload;
+
+      state.layers.splice(layerIndex, 1);
       break;
     }
 
@@ -222,7 +237,7 @@ export default async function onmessage(e) {
     case 'modVModules/updateMeta': {
       const { name, metaKey, data } = payload;
 
-      state.active[name].meta[metaKey] = data;
+      if (state.active[name]) state.active[name].meta[metaKey] = data;
       break;
     }
 

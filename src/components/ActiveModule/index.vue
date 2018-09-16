@@ -241,8 +241,6 @@
     },
     mounted() {
       if (!this.module) return;
-      this.enabled = this.module.meta.enabled;
-      this.opacity = this.module.meta.alpha;
 
       this.operations[0]
         .children.find(item => item.value === this.module.meta.compositeOperation).selected = true;

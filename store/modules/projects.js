@@ -59,6 +59,8 @@ const actions = {
   async loadPreset({}, { presetData }) { //eslint-disable-line
     await store.dispatch('layers/removeAllLayers');
 
+    debugger;
+
     presetData.layers.forEach(async (Layer) => {
       const { index } = await store.dispatch('layers/addLayer');
       const layerIndex = index;
@@ -80,43 +82,43 @@ const actions = {
         const module = await store.dispatch('modVModules/createActiveModule', { moduleName });
         const data = presetData.moduleData[moduleName];
 
-        await store.dispatch('modVModules/updateMeta', {
+        store.dispatch('modVModules/updateMeta', {
           name: moduleName,
           metaKey: 'alpha',
           data: data.meta.alpha,
         });
 
-        await store.dispatch('modVModules/updateMeta', {
+        store.dispatch('modVModules/updateMeta', {
           name: moduleName,
           metaKey: 'author',
           data: data.meta.author,
         });
 
-        await store.dispatch('modVModules/updateMeta', {
+        store.dispatch('modVModules/updateMeta', {
           name: moduleName,
           metaKey: 'compositeOperation',
           data: data.meta.compositeOperation,
         });
 
-        await store.dispatch('modVModules/updateMeta', {
+        store.dispatch('modVModules/updateMeta', {
           name: moduleName,
           metaKey: 'enabled',
           data: data.meta.enabled,
         });
 
-        await store.dispatch('modVModules/updateMeta', {
+        store.dispatch('modVModules/updateMeta', {
           name: moduleName,
           metaKey: 'alpha',
           data: data.meta.alpha,
         });
 
-        await store.dispatch('modVModules/updateMeta', {
+        store.dispatch('modVModules/updateMeta', {
           name: moduleName,
           metaKey: 'originalName',
           data: data.meta.originalName,
         });
 
-        await store.dispatch('modVModules/updateMeta', {
+        store.dispatch('modVModules/updateMeta', {
           name: moduleName,
           metaKey: 'version',
           data: data.meta.version,

@@ -169,86 +169,92 @@ const actions = {
         }
       }
 
-      if ('init' in newModuleData && !skipInit) {
-        newModuleData.init({ canvas });
-      }
+      if (newModuleData.meta.name.indexOf('-gallery') > -1) {
+        if ('init' in newModuleData && !skipInit) {
+          newModuleData.init({ canvas });
+        }
 
-      if ('resize' in newModuleData && !skipInit) {
-        newModuleData.resize({ canvas });
+        if ('resize' in newModuleData && !skipInit) {
+          newModuleData.resize({ canvas });
+        }
       }
 
       resolve(outerState.active[newModuleData.meta.name]);
     });
   },
 
-  async removeActiveModule({ state, commit }, { moduleName }) {
-    store.commit('controlPanels/unpinPanel', { moduleName });
+  removeActiveModule({ state, commit }, { moduleName }) {
+    return new Promise(async (resolve) => {
+      store.commit('controlPanels/unpinPanel', { moduleName });
 
-    if (state.focusedModule === moduleName) {
-      commit('setModuleFocus', { activeModuleName: null });
-    }
+      if (state.focusedModule === moduleName) {
+        commit('setModuleFocus', { activeModuleName: null });
+      }
 
-    const module = state.active[moduleName];
+      const module = state.active[moduleName];
 
-    const { props, meta } = module;
+      const { props, meta } = module;
 
-    if (props) {
-      Object.keys(props).forEach(async (key) => {
-        const value = props[key];
+      if (props) {
+        Object.keys(props).forEach(async (key) => {
+          const value = props[key];
 
-        if (value.control && value.control.type === 'paletteControl') {
-          await store.dispatch('palettes/removePalette', {
-            id: `${meta.name}-${key}`,
-          });
-        }
-      });
-    }
+          if (value.control && value.control.type === 'paletteControl') {
+            await store.dispatch('palettes/removePalette', {
+              id: `${meta.name}-${key}`,
+            });
+          }
+        });
+      }
 
-    // if ('controls' in Module.info) {
-    //   Object.keys(Module.info.controls).forEach((key) => {
-    //     const control = Module.info.controls[key];
-    //     const inputId = `${moduleName}-${control.variable}`;
+      // if ('controls' in Module.info) {
+      //   Object.keys(Module.info.controls).forEach((key) => {
+      //     const control = Module.info.controls[key];
+      //     const inputId = `${moduleName}-${control.variable}`;
 
-    //     if (control.type === 'paletteControl') {
-    //       store.dispatch('palettes/removePalette', {
-    //         id: inputId,
-    //       });
-    //     }
-    //   });
-    // }
+      //     if (control.type === 'paletteControl') {
+      //       store.dispatch('palettes/removePalette', {
+      //         id: inputId,
+      //       });
+      //     }
+      //   });
+      // }
 
-    /* Remove active module from Layers */
-    const layer = store.getters['layers/layerFromModuleName']({ moduleName });
-    if (layer) {
-      const moduleOrder = layer.layer.moduleOrder;
-      moduleOrder.splice(moduleOrder.indexOf(moduleName), 1);
+      /* Remove active module from Layers */
+      const layer = store.getters['layers/layerFromModuleName']({ moduleName });
+      console.log(moduleName, layer);
+      if (layer) {
+        const moduleOrder = layer.layer.moduleOrder;
+        moduleOrder.splice(moduleOrder.indexOf(moduleName), 1);
 
-      await store.dispatch('layers/updateModuleOrder', {
-        layerIndex: layer.layerIndex,
-        order: moduleOrder,
-      });
-    }
+        await store.dispatch('layers/updateModuleOrder', {
+          layerIndex: layer.layerIndex,
+          order: moduleOrder,
+        });
+      }
 
-    commit('removeActiveModule', { moduleName });
+      commit('removeActiveModule', { moduleName });
+      resolve();
+    });
   },
 
-  resizeActive({ state }) {
-    const canvas = modV.bufferCanvas;
-    Object.keys(state.active).forEach((moduleName) => {
-      let module;
+  resizeActive(/* { state } */) {
+    // const canvas = modV.bufferCanvas;
+    // Object.keys(state.active).forEach((moduleName) => {
+    //   let module;
 
-      if (moduleName.indexOf('-gallery') > -1) return;
+    //   if (moduleName.indexOf('-gallery') > -1) return;
 
-      if (moduleName in outerState.active) {
-        module = outerState.active[moduleName];
-      } else {
-        return;
-      }
+    //   if (moduleName in outerState.active) {
+    //     module = outerState.active[moduleName];
+    //   } else {
+    //     return;
+    //   }
 
-      if ('resize' in module) {
-        module.resize({ canvas });
-      }
-    });
+    //   if ('resize' in module) {
+    //     module.resize({ canvas });
+    //   }
+    // });
   },
 
   updateProp({ state, commit }, { name, prop, data, group, groupName }) {
@@ -535,6 +541,7 @@ const mutations = {
   removeActiveModule(state, { moduleName }) {
     delete outerState.active[moduleName];
     Vue.delete(state.active, moduleName);
+    console.log('del active', moduleName);
   },
 
   setModuleFocus(state, { activeModuleName }) {
