@@ -95,7 +95,5 @@ export default function Layer(layer) {
     },
   };
 
-  defaults.context = defaults.canvas.getContext('2d');
-
   return Object.assign(defaults, layer);
 }

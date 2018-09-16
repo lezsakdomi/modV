@@ -1,8 +1,17 @@
+/* eslint-env worker */
+/* globals OffscreenCanvas */
+
 import createREGL from 'regl/dist/regl.unchecked';
 import defaultShader from './default-shader';
 
+let env;
+
+function getEnv() {
+  return env;
+}
+
 function setupWebGl(modV) {
-  const canvas = document.createElement('canvas');
+  const canvas = typeof window === 'undefined' ? new OffscreenCanvas(256, 256) : document.createElement('canvas');
   const gl = canvas.getContext('webgl2', {
     premultipliedAlpha: false,
     antialias: true,
@@ -15,13 +24,13 @@ function setupWebGl(modV) {
     },
   });
 
-  const env = { gl, canvas, regl };
+  env = { gl, canvas, regl };
 
   Object.defineProperty(env, 'defaultShader', {
     get: () => defaultShader,
   });
 
-  modV.webgl = env;
+  if (modV && modV.webgl) modV.webgl = env;
 
   env.resize = (widthIn, heightIn, dpr = 1) => {
     const width = widthIn * dpr;
@@ -31,9 +40,12 @@ function setupWebGl(modV) {
     canvas.height = height;
   };
 
-  env.resize(modV.width, modV.height);
+  if (modV) env.resize(modV.width, modV.height);
 
   return env;
 }
 
-export default setupWebGl;
+export {
+  setupWebGl,
+  getEnv,
+};

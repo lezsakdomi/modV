@@ -1,6 +1,8 @@
-import { webgl } from '@/modv';
+import { setupWebGl } from '@/modv/webgl';
 
 let modVCanvasTexture;
+
+const webgl = setupWebGl();
 
 function render({ Module, canvas, context, pipeline }) {
   const regl = webgl.regl;

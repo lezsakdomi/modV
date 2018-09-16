@@ -1,4 +1,14 @@
-const twoDCanvas = document.createElement('canvas');
+/* eslint-env worker browser */
+/* globals OffscreenCanvas */
+
+let twoDCanvas;
+
+if (typeof window !== 'undefined') {
+  twoDCanvas = document.createElement('canvas');
+} else {
+  twoDCanvas = new OffscreenCanvas(256, 256);
+}
+
 const twoDContext = twoDCanvas.getContext('2d');
 
 /**

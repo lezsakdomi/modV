@@ -199,10 +199,11 @@
           if (!this.moduleName) return false;
           return this.$store.state.modVModules.active[this.moduleName].meta.enabled;
         },
-        set(value) {
-          this.setActiveModuleEnabled({
-            moduleName: this.moduleName,
-            enabled: value,
+        set(data) {
+          this.$store.dispatch('modVModules/updateMeta', {
+            name: this.moduleName,
+            metaKey: 'enabled',
+            data,
           });
         },
       },
@@ -220,7 +221,6 @@
       ...mapMutations('modVModules', [
         'setCurrentDragged',
         'setModuleFocus',
-        'setActiveModuleEnabled',
         'setActiveModuleCompositeOperation',
       ]),
       focusActiveModule() {
@@ -248,10 +248,11 @@
         .children.find(item => item.value === this.module.meta.compositeOperation).selected = true;
     },
     watch: {
-      compositeOperation() {
-        this.setActiveModuleCompositeOperation({
-          moduleName: this.moduleName,
-          compositeOperation: this.compositeOperation,
+      compositeOperation(data) {
+        this.$store.dispatch('modVModules/updateMeta', {
+          name: this.moduleName,
+          metaKey: 'compositeOperation',
+          data,
         });
       },
     },

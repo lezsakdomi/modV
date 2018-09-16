@@ -102,10 +102,10 @@ const actions = {
   updateModuleOrder({ commit }, { layerIndex, order }) {
     commit('updateModuleOrder', { layerIndex, order });
   },
-  resize({ state }, { width, height, dpr }) {
-    state.layers.forEach((Layer) => {
-      Layer.resize({ width, height, dpr });
-    });
+  resize(/* { state }, { width, height, dpr } */) {
+    // state.layers.forEach((Layer) => {
+    //   Layer.resize({ width, height, dpr });
+    // });
   },
   removeAllLayers({ commit, state }) {
     state.layers.forEach((Layer, layerIndex) => {

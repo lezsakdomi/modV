@@ -3,11 +3,61 @@ import BeatDetektor from '@/extra/beatdetektor';
 import store from '@/../store/';
 import Layer from './Layer';
 import { scan, setSource } from './MediaStream';
-import draw from './draw';
-import setupWebGl from './webgl';
+import { setupWebGl } from './webgl';
 import PaletteWorker from './palette-worker/palette-worker';
 import MediaManagerClient from './MediaManagerClient';
 import installPlugin from './install-plugin';
+
+const DrawWorker = require('worker-loader!./offscreen-draw'); //eslint-disable-line
+
+function convertToText(obj) {
+  // Create an array that will later be joined into a string.
+  const string = [];
+
+  if (obj === null) return '';
+
+  // is Object
+  if ((typeof obj === 'object') && (obj.join === undefined)) {
+    string.push('{');
+
+    for (let prop in obj) { //eslint-disable-line
+      if (typeof obj[prop] !== 'undefined') {
+        string.push(prop, ':', convertToText(obj[prop]), ',');
+      }
+    }
+
+    string.push('}');
+
+  // is Array
+  } else if ((typeof obj === 'object') && (obj.join !== undefined)) {
+    string.push('[');
+
+    for (let prop in obj) { //eslint-disable-line
+      if (typeof obj[prop] !== 'undefined') {
+        string.push(convertToText(obj[prop]), ',');
+      }
+    }
+
+    string.push(']');
+
+  // is Function
+  } else if (typeof obj === 'function') {
+    // function shorthand conversion
+    let functionString = obj.toString();
+
+    if (functionString.indexOf(`${obj.name}(`) > -1) {
+      functionString = functionString.replace(`${obj.name}(`, 'function(');
+    }
+
+    string.push(functionString);
+
+  // all other values can be done with JSON.stringify (not really, but good enough for this example)
+  } else {
+    string.push(JSON.stringify(obj));
+  }
+
+  return string.join('');
+}
 
 class ModV extends EventEmitter2 {
   /**
@@ -68,20 +118,69 @@ class ModV extends EventEmitter2 {
     });
 
     this.delta = 0;
+
+    this.outputCanvas = document.createElement('canvas');
+    const offscreenOutputCanvas = this.outputCanvas.transferControlToOffscreen();
+
+    this.drawWorker = new DrawWorker();
+
+    this.drawWorker.postMessage({ canvas: offscreenOutputCanvas }, [offscreenOutputCanvas]);
+
+    const mutations = [
+      'layers/addLayer',
+      'modVModules/addModuleToRegistry',
+      'modVModules/addModuleToActive',
+      'modVModules/updateProp',
+      'size/setDimensions',
+      'modVModules/updateMeta',
+      'layers/setClearing',
+      'layers/setAlpha',
+      'layers/setEnabled',
+      'layers/setInherit',
+      'layers/setInheritFrom',
+      'layers/setPipeline',
+      'layers/setBlending',
+      'layers/setDrawToOutput',
+      'size/setPreviewValues',
+    ];
+
+    /* Subscribe to the store's actions (or mutations) to send state updates to the worker */
+    store.subscribe((mutationIn) => {
+      const type = mutationIn.type;
+
+      if (mutations.indexOf(type) < 0) return;
+
+      const mutation = Object.assign({}, mutationIn);
+
+      if (type === 'modVModules/addModuleToActive') {
+        if (mutation.payload.data.meta.name.indexOf('-gallery') > -1) {
+          return;
+        }
+
+        if (mutation.payload.data.renderer) {
+          delete mutation.payload.data.renderer;
+        }
+      }
+
+      if (type === 'layers/addLayer') {
+        delete mutation.payload.layer.canvas;
+        delete mutation.payload.layer.context;
+        delete mutation.payload.layer.resize;
+      }
+
+      let stringified = convertToText(mutation);
+      stringified = stringified.replace(/function function/g, 'function');
+      this.drawWorker.postMessage(stringified);
+    });
   }
 
   start(Vue) {
     const mediaStreamScan = this.mediaStreamScan;
     const setMediaStreamSource = this.setMediaStreamSource;
 
-    this.bufferCanvas = document.createElement('canvas');
-    this.bufferContext = this.bufferCanvas.getContext('2d');
-
-    this.outputCanvas = document.createElement('canvas');
-    this.outputContext = this.outputCanvas.getContext('2d');
-
     this.previewCanvas = document.getElementById('preview-canvas');
-    this.previewContext = this.previewCanvas.getContext('2d');
+    const previewOffscreen = this.previewCanvas.transferControlToOffscreen();
+    this.drawWorker.postMessage({ previewCanvas: previewOffscreen }, [previewOffscreen]);
 
     this.videoStream = document.createElement('video');
     this.videoStream.autoplay = true;
@@ -126,11 +225,13 @@ class ModV extends EventEmitter2 {
   }
 
   loop(δ) {
+    this.mainRaf = requestAnimationFrame(this.loop.bind(this));
     this.delta = δ;
     let features = [];
 
     if (this.audioFeatures.length > 0) {
       features = this.meyda.get(this.audioFeatures);
+      if (features) this.drawWorker.postMessage({ features });
     }
 
     if (features) {
@@ -162,11 +263,9 @@ class ModV extends EventEmitter2 {
 
     store.dispatch('modVModules/syncQueues');
 
-    draw(δ).then(() => {
-      this.mainRaf = requestAnimationFrame(this.loop.bind(this));
-    }).then(() => {
-      this.emit('tick', δ);
-    });
+    this.webgl.regl.poll();
+
+    this.emit('tick', δ);
   }
 
   use(plugin) { //eslint-disable-line
@@ -187,11 +286,6 @@ class ModV extends EventEmitter2 {
   resize(width, height, dpr = 1) {
     this.width = width * dpr;
     this.height = height * dpr;
-
-    this.bufferCanvas.width = this.width;
-    this.bufferCanvas.height = this.height;
-    this.outputCanvas.width = this.width;
-    this.outputCanvas.height = this.height;
 
     this.isf.canvas.width = this.width;
     this.isf.canvas.height = this.height;
@@ -238,5 +332,4 @@ export {
   Layer,
   webgl,
   isf,
-  draw,
 };

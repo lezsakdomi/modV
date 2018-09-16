@@ -59,20 +59,22 @@ const actions = {
       store.dispatch('modVModules/resizeActive');
       store.dispatch('layers/resize', { width: state.width, height: state.height, dpr });
       store.dispatch('windows/resize', { width: state.width, height: state.height, dpr });
-      store.dispatch('size/calculatePreviewCanvasValues');
+      const width = modV.previewCanvas.clientWidth;
+      const height = modV.previewCanvas.clientHeight;
+      store.dispatch('size/calculatePreviewCanvasValues', { width, height });
     }
   },
   resizePreviewCanvas() {
-    modV.previewCanvas.width = modV.previewCanvas.clientWidth;
-    modV.previewCanvas.height = modV.previewCanvas.clientHeight;
-    store.dispatch('size/calculatePreviewCanvasValues');
+    const width = modV.previewCanvas.clientWidth;
+    const height = modV.previewCanvas.clientHeight;
+    store.dispatch('size/calculatePreviewCanvasValues', { width, height });
   },
-  calculatePreviewCanvasValues({ commit, state }) {
+  calculatePreviewCanvasValues({ commit, state }, { width, height }) {
     // thanks to http://ninolopezweb.com/2016/05/18/how-to-preserve-html5-canvas-aspect-ratio/
     // for great aspect ratio advice!
     const widthToHeight = state.width / state.height;
-    let newWidth = modV.previewCanvas.width;
-    let newHeight = modV.previewCanvas.height;
+    let newWidth = width;
+    let newHeight = height;
 
     const newWidthToHeight = newWidth / newHeight;
 
@@ -83,8 +85,8 @@ const actions = {
     }
 
     commit('setPreviewValues', {
-      x: Math.round((modV.previewCanvas.width / 2) - (newWidth / 2)),
-      y: Math.round((modV.previewCanvas.height / 2) - (newHeight / 2)),
+      x: Math.round((width / 2) - (newWidth / 2)),
+      y: Math.round((height / 2) - (newHeight / 2)),
       width: newWidth,
       height: newHeight,
     });

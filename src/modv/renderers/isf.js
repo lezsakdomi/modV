@@ -1,16 +1,26 @@
-import { isf } from '@/modv';
+/* eslint-env worker browser */
+/* globals OffscreenCanvas */
+
 import {
   Renderer as ISFRenderer,
   Parser as ISFParser,
   Upgrader as ISFUpgrader,
-} from 'interactive-shader-format-for-modv';
+} from 'interactive-shader-format-for-modv/src/main';
+
+const isf = {};
+
+isf.canvas = new OffscreenCanvas(256, 256);
+isf.gl = isf.canvas.getContext('webgl2', {
+  premultipliedAlpha: false,
+});
 
 function render({ Module, canvas, context, pipeline }) {
   if (Module.inputs) {
     Module.inputs.forEach((input) => {
       if (input.TYPE === 'image') {
         if (input.NAME in Module.props) {
-          Module.renderer.setValue(input.NAME, Module[input.NAME] || canvas);
+          const value = Module[input.NAME] || canvas;
+          Module.renderer.setValue(input.NAME, value);
         } else {
           Module.renderer.setValue(input.NAME, canvas);
         }
@@ -142,7 +152,13 @@ function setup(Module) {
   return Module;
 }
 
+function resize({ width, height }) {
+  isf.canvas.width = width;
+  isf.canvas.height = height;
+}
+
 export {
   setup, //eslint-disable-line
   render,
+  resize,
 };

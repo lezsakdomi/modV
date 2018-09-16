@@ -56,7 +56,8 @@ class WindowController {
     windowRef.document.body.style.position = 'relative';
 
     this.canvas = document.createElement('canvas');
-    this.context = this.canvas.getContext('2d');
+    const offscreen = this.canvas.transferControlToOffscreen();
+    modV.drawWorker.postMessage({ windowCanvas: offscreen }, [offscreen]);
 
     this.canvas.style.backgroundColor = 'transparent';
     this.canvas.style.left = '50%';
@@ -100,15 +101,15 @@ class WindowController {
 
       const width = resizeQueue.width;
       const height = resizeQueue.height;
-      const dpr = resizeQueue.dpr;
+      // const dpr = resizeQueue.dpr;
       const emit = resizeQueue.emit;
 
       if (emit) {
         store.dispatch('size/setDimensions', { width, height });
       }
 
-      this.canvas.width = store.state.size.width || width * dpr;
-      this.canvas.height = store.state.size.height || height * dpr;
+      // this.canvas.width = store.state.size.width || width * dpr;
+      // this.canvas.height = store.state.size.height || height * dpr;
       this.canvas.style.width = `${store.state.size.width}px`;
       this.canvas.style.height = `${store.state.size.height}px`;
 
