@@ -1,10 +1,9 @@
 /* eslint-env worker */
 
-import ci from 'correcting-interval';
 import Palette from './Palette';
 import { forIn } from '../utils';
 
-let timer;
+let paletteRaf;
 const palettes = new Map();
 self.palettes = palettes;
 
@@ -32,6 +31,7 @@ function removePalette(id) {
 }
 
 function loop() {
+  paletteRaf = requestAnimationFrame(loop);
   palettes.forEach((palette) => {
     palette.update().then((step) => {
       postMessage({
@@ -60,13 +60,13 @@ onmessage = function onmessage(e) {
   }
 
   if (e.data.message === 'stop-loop') {
-    ci.clearCorrectingInterval(timer);
-    timer = undefined;
+    paletteRaf = cancelAnimationFrame(paletteRaf);
+    paletteRaf = false;
   }
 
   if (e.data.message === 'start-loop') {
-    if (timer === undefined) ci.setCorrectingInterval(loop, 1000 / 60);
+    if (!paletteRaf) paletteRaf = requestAnimationFrame(loop);
   }
 };
 
-if (timer === undefined) ci.setCorrectingInterval(loop, 1000 / 60);
+if (!paletteRaf) paletteRaf = requestAnimationFrame(loop);

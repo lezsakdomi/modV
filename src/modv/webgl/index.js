@@ -32,7 +32,7 @@ function setupWebGl(modV) {
 
   if (modV && modV.webgl) modV.webgl = env;
 
-  env.resize = (widthIn, heightIn, dpr = 1) => {
+  env.resize = ({ width: widthIn, height: heightIn, dpr = 1 }) => {
     const width = widthIn * dpr;
     const height = heightIn * dpr;
 
@@ -40,7 +40,7 @@ function setupWebGl(modV) {
     canvas.height = height;
   };
 
-  if (modV) env.resize(modV.width, modV.height);
+  if (modV) env.resize({ width: modV.width, height: modV.height });
 
   return env;
 }

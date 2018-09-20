@@ -63,8 +63,6 @@
           flipY = inputs[0].sampler.vflip === 'true';
         }
 
-        console.log(result, flipY);
-
         modV.register({
           meta: {
             name: result.info.name,

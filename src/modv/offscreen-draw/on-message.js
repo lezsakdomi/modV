@@ -7,6 +7,7 @@ import cloneDeep from 'lodash.clonedeep';
 
 import { setup as shaderSetup } from '@/modv/renderers/shader';
 import { setup as isfSetup, resize as resizeIsf } from '@/modv/renderers/isf';
+import { getEnv } from '@/modv/webgl';
 
 import state from './state';
 import { setDimensions, getOutputCanvas, setOutputCanvas } from './canvas';
@@ -49,7 +50,7 @@ const textureResolve = (sourceDef) => {
 
 export default async function onmessage(e) {
   if (e.data.dumpState) {
-    console.log(state);
+    console.log(state); //eslint-disable-line
     return;
   }
 
@@ -186,7 +187,6 @@ export default async function onmessage(e) {
       }
 
       state.active[payload.name || payload.data.meta.originalName] = newModuleData;
-      state.layers[0].moduleOrder.push(payload.name || payload.data.meta.originalName);
 
       if ('init' in newModuleData) {
         newModuleData.init({ canvas });
@@ -195,6 +195,29 @@ export default async function onmessage(e) {
       if ('resize' in newModuleData) {
         newModuleData.resize({ canvas });
       }
+
+      break;
+    }
+
+    case 'layers/addModuleToLayer': {
+      const { moduleName, layerIndex, position } = payload;
+
+      const Layer = state.layers[layerIndex];
+      if (Layer.locked) return;
+
+      if (!Layer) {
+        throw new Error(`Cannot find Layer with index ${layerIndex}`);
+      } else {
+        Layer.moduleOrder.splice(position, 0, moduleName);
+      }
+
+      break;
+    }
+
+    case 'layers/updateModuleOrder': {
+      const { layerIndex, order } = payload;
+      const Layer = state.layers[layerIndex];
+      Layer.moduleOrder = order;
 
       break;
     }
@@ -244,15 +267,9 @@ export default async function onmessage(e) {
     case 'size/setDimensions': {
       setDimensions(payload);
       resizeIsf(payload);
-      state.layers.forEach((layer) => {
-        layer.canvas.width = payload.width;
-        layer.canvas.height = payload.height;
-      });
-
-      state.windows.forEach((window) => {
-        window.canvas.width = payload.width;
-        window.canvas.height = payload.height;
-      });
+      getEnv().resize(payload);
+      state.queueWidth = payload.width;
+      state.queueHeight = payload.height;
 
       break;
     }

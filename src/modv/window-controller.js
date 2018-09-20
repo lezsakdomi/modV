@@ -54,6 +54,7 @@ class WindowController {
     windowRef.document.body.style.margin = '0px';
     windowRef.document.body.style.backgroundColor = 'black';
     windowRef.document.body.style.position = 'relative';
+    windowRef.document.body.style.overflow = 'hidden';
 
     this.canvas = document.createElement('canvas');
     const offscreen = this.canvas.transferControlToOffscreen();
@@ -88,53 +89,39 @@ class WindowController {
 
     this.window.document.body.appendChild(this.canvas);
 
-    let resizeQueue = {};
     let lastArea = 0;
-    // Roughly attach to the main RAF loop for smoother resizing
-    modV.on('tick', () => {
-      if (lastArea < 1) return;
+    let resizeRaf = false;
 
-      if ((resizeQueue.width * resizeQueue.height) + resizeQueue.dpr !== lastArea) {
-        lastArea = (resizeQueue.width * resizeQueue.height) + resizeQueue.dpr;
+    const checkResize = () => {
+      resizeRaf = requestAnimationFrame(checkResize);
+      const { innerWidth: width, innerHeight: height } = windowRef;
+
+      const thisArea = width * height;
+
+      if (thisArea === lastArea) {
+        this.resize(width, height, window.devicePixelRatio, true);
+        cancelAnimationFrame(resizeRaf);
+        resizeRaf = false;
         return;
       }
 
-      const width = resizeQueue.width;
-      const height = resizeQueue.height;
-      // const dpr = resizeQueue.dpr;
-      const emit = resizeQueue.emit;
+      lastArea = thisArea;
+    };
 
+    this.resize = (width = 256, height = 256, dpr = window.devicePixelRatio || 1, emit = false) => {
       if (emit) {
         store.dispatch('size/setDimensions', { width, height });
+        return;
       }
 
-      // this.canvas.width = store.state.size.width || width * dpr;
-      // this.canvas.height = store.state.size.height || height * dpr;
-      this.canvas.style.width = `${store.state.size.width}px`;
-      this.canvas.style.height = `${store.state.size.height}px`;
-
-      lastArea = 0;
-    });
-
-    this.resize = (width, height, dpr = 1, emit = true) => {
-      resizeQueue = {
-        width,
-        height,
-        dpr,
-        emit,
-      };
-      lastArea = 1;
+      this.canvas.style.width = `${width}px`;
+      this.canvas.style.height = `${height}px`;
     };
 
     windowRef.addEventListener('resize', () => {
-      let dpr = windowRef.devicePixelRatio;
-
-      if (!store.getters['user/useRetina']) {
-        dpr = 1;
-      }
-
-      this.resize(windowRef.innerWidth, windowRef.innerHeight, dpr);
+      if (!resizeRaf) resizeRaf = requestAnimationFrame(checkResize);
     });
+
     windowRef.addEventListener('beforeunload', () => 'You sure about that, you drunken mess?');
     windowRef.addEventListener('unload', () => {
       store.dispatch('windows/destroyWindow', { windowRef: this.window });

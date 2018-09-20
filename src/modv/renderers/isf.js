@@ -12,6 +12,7 @@ const isf = {};
 isf.canvas = new OffscreenCanvas(256, 256);
 isf.gl = isf.canvas.getContext('webgl2', {
   premultipliedAlpha: false,
+  antialias: true,
 });
 
 function render({ Module, canvas, context, pipeline }) {

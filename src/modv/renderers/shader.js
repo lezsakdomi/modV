@@ -1,10 +1,11 @@
-import { setupWebGl } from '@/modv/webgl';
+import { getEnv, setupWebGl } from '@/modv/webgl';
 
 let modVCanvasTexture;
 
-const webgl = setupWebGl();
+setupWebGl();
 
 function render({ Module, canvas, context, pipeline }) {
+  const webgl = getEnv();
   const regl = webgl.regl;
 
   if (!modVCanvasTexture) {
@@ -14,7 +15,7 @@ function render({ Module, canvas, context, pipeline }) {
       wrap: ['mirror', 'mirror'],
       mag: 'linear',
       min: 'linear mipmap linear',
-      flipY: Module.meta.flipY,
+      flipY: !!Module.meta.flipY,
     });
   } else {
     modVCanvasTexture({
@@ -23,7 +24,7 @@ function render({ Module, canvas, context, pipeline }) {
       wrap: ['mirror', 'mirror'],
       mag: 'linear',
       min: 'linear mipmap linear',
-      flipY: Module.meta.flipY,
+      flipY: !!Module.meta.flipY,
     });
   }
 
@@ -59,6 +60,7 @@ function render({ Module, canvas, context, pipeline }) {
     color: [0, 0, 0, 0],
   });
 
+  regl.poll();
   Module.reglDraw(uniforms);
 
   context.save();
@@ -78,6 +80,7 @@ function render({ Module, canvas, context, pipeline }) {
  * @return {Promise} Resolves with completion of compiled shaders
  */
 function makeProgram(Module) {
+  const webgl = getEnv();
   const regl = webgl.regl;
 
   return new Promise((resolve, reject) => {

@@ -35,7 +35,6 @@ const actions = {
     const height = store.getters['size/height'];
 
     modV.resize(width, height, dpr);
-    store.dispatch('modVModules/resizeActive');
     store.dispatch('layers/resize', { width, height, dpr });
     store.dispatch('windows/resize', { width, height, dpr });
   },

@@ -36,25 +36,9 @@ const state = {
 
 // getters
 const getters = {
-  // registry: state => state.registry,
-  // activeModules: state => state.active,
   focusedModule: state => outerState.active[state.focusedModule],
   focusedModuleName: state => state.focusedModule,
-  // getActiveModule: () => moduleName => externalState.active[moduleName],
   currentDragged: state => state.currentDragged,
-  // getValueFromActiveModule: state => (moduleName, controlVariable) => {
-  //   const module = externalState.active[moduleName];
-  //   let processed = externalState.active[moduleName][controlVariable];
-
-  //   if ('append' in module.info.controls[controlVariable]) {
-  //     processed = processed.replace(module.info.controls[controlVariable].append, '');
-  //   }
-
-  //   return {
-  //     raw: state.active[moduleName][controlVariable],
-  //     processed,
-  //   };
-  // },
   registry: state => state.registry,
   active: state => state.active,
   outerRegistry: () => outerState.registry,
@@ -222,7 +206,6 @@ const actions = {
 
       /* Remove active module from Layers */
       const layer = store.getters['layers/layerFromModuleName']({ moduleName });
-      console.log(moduleName, layer);
       if (layer) {
         const moduleOrder = layer.layer.moduleOrder;
         moduleOrder.splice(moduleOrder.indexOf(moduleName), 1);
@@ -236,25 +219,6 @@ const actions = {
       commit('removeActiveModule', { moduleName });
       resolve();
     });
-  },
-
-  resizeActive(/* { state } */) {
-    // const canvas = modV.bufferCanvas;
-    // Object.keys(state.active).forEach((moduleName) => {
-    //   let module;
-
-    //   if (moduleName.indexOf('-gallery') > -1) return;
-
-    //   if (moduleName in outerState.active) {
-    //     module = outerState.active[moduleName];
-    //   } else {
-    //     return;
-    //   }
-
-    //   if ('resize' in module) {
-    //     module.resize({ canvas });
-    //   }
-    // });
   },
 
   updateProp({ state, commit }, { name, prop, data, group, groupName }) {
@@ -444,6 +408,7 @@ const actions = {
       moduleData[moduleName].meta = Object.assign(Module.meta, moduleData[moduleName].meta);
 
       if (!('saveData' in Module.meta)) {
+        /* eslint-disable no-console */
         console.warn(
           `generatePreset: Module ${Module.meta.name} has no saveData schema, falling back to Vuex store data`,
         );
@@ -460,6 +425,7 @@ const actions = {
           `generatePreset: Module ${Module.meta.name} failed saveData validation, skipping`,
           validate.errors,
         );
+        /* eslint-enable no-console */
         return;
       }
 
@@ -541,7 +507,6 @@ const mutations = {
   removeActiveModule(state, { moduleName }) {
     delete outerState.active[moduleName];
     Vue.delete(state.active, moduleName);
-    console.log('del active', moduleName);
   },
 
   setModuleFocus(state, { activeModuleName }) {

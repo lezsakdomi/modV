@@ -56,7 +56,6 @@ const actions = {
       if (!store.getters['user/useRetina']) dpr = 1;
 
       modV.resize(state.width, state.height, dpr);
-      store.dispatch('modVModules/resizeActive');
       store.dispatch('layers/resize', { width: state.width, height: state.height, dpr });
       store.dispatch('windows/resize', { width: state.width, height: state.height, dpr });
       const width = modV.previewCanvas.clientWidth;

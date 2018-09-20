@@ -144,6 +144,8 @@ class ModV extends EventEmitter2 {
       'size/setPreviewValues',
       'layers/removeLayer',
       'modVModules/removeActiveModule',
+      'layers/addModuleToLayer',
+      'layers/updateModuleOrder',
     ];
 
     /* Subscribe to the store's actions (or mutations) to send state updates to the worker */

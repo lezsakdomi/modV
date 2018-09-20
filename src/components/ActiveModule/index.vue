@@ -15,14 +15,13 @@
             <div class="columns is-gapless is-mobile">
               <div class="column options">
                 <b-field
-                v-context-menu="checkboxMenuOptions"
                   horizontal
-                  :for="enabledCheckboxId"
-                  @click.native="checkboxClick"
                   label="Enabled"
+                  :labelFor="enabledCheckboxId"
                 >
                   <b-checkbox
                     v-model="enabled"
+                    v-context-menu="checkboxMenuOptions"
                     :id="enabledCheckboxId"
                   />
                 </b-field>

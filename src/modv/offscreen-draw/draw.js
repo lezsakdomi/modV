@@ -14,12 +14,26 @@ import render2d from '../renderers/2d';
 
 setBufferCanvas(new OffscreenCanvas(256, 256));
 
+function checkSize(canvas) {
+  if (state.queueWidth !== canvas.width || state.queueHeight !== canvas.height) {
+    canvas.width = state.queueWidth;
+    canvas.height = state.queueHeight;
+  }
+}
+
 function draw(delta) {
   const { canvas: outputCanvas, context: outputContext } = getOutputCanvas();
   const { canvas: bufferCanvas, context: bufferContext } = getBufferCanvas();
 
+  const webGlEnv = getEnv();
+  if (webGlEnv) {
+    webGlEnv.regl.poll();
+  }
+
   state.layers.forEach((Layer, LayerIndex) => {
     let canvas = Layer.canvas;
+    checkSize(canvas);
+
     const { context, clearing, alpha, enabled, inherit, inheritFrom, pipeline } = Layer;
 
     if (!enabled || alpha === 0) return;
@@ -197,22 +211,22 @@ function draw(delta) {
     });
   });
 
-  const webGlEnv = getEnv();
-  if (webGlEnv) {
-    webGlEnv.regl.poll();
-  }
-
   outputContext.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
 
   state.layers.forEach((Layer) => {
     if (!Layer.enabled || Layer.alpha === 0 || !Layer.drawToOutput) return;
     const canvas = Layer.canvas;
+
+    checkSize(canvas);
+
     outputContext.drawImage(canvas, 0, 0, outputCanvas.width, outputCanvas.height);
   });
 
   state.windows.forEach((windowController) => {
     const canvas = windowController.canvas;
     const context = windowController.context;
+
+    checkSize(canvas);
 
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.drawImage(outputCanvas, 0, 0, canvas.width, canvas.height);

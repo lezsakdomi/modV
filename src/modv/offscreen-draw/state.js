@@ -11,6 +11,8 @@ const state = {
     width: 0,
     height: 0,
   },
+  queueWidth: 0,
+  queueHeight: 0,
 };
 
 export default state;

@@ -68,8 +68,10 @@
           });
         }
       }).catch((e) => {
+        /* eslint-disable no-console */
         console.log(`An error occoured whilst initialising a gallery module - ${this.Module.meta.name}`);
         console.error(e);
+        /* eslint-enable no-console */
       });
     },
     methods: {

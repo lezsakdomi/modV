@@ -6,9 +6,11 @@
     <section class="modal-card-body">
       <b>Function Type</b>
       <b-field>
-        <b-radio-button v-model="expressionFunction"
+        <b-radio-button
+          v-model="expressionFunction"
           :native-value="waveform"
           v-for="waveform, idx in lfoTypes"
+          :key="idx"
         >
           <img :src="`@/../static/graphics/icons/${waveform}.svg`" class="icon">
           <span>&nbsp;{{ waveform | capitalize }}</span>

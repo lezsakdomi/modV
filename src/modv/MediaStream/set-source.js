@@ -4,7 +4,7 @@ import Vue from '@/main';
 function userMediaSuccess(stream, ids) {
   return new Promise((resolve) => {
     // Create video stream
-    this.videoStream.src = window.URL.createObjectURL(stream);
+    this.videoStream.src = stream;
 
     // If we have opened a previous AudioContext, destroy it as the number of AudioContexts
     // are limited to 6
