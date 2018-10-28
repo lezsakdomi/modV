@@ -29,8 +29,10 @@
  * @property {Boolean} drawToOutput        Indicates whether the Layer should draw to the output
  *                                         canvas
  *
- * @proerty {String} drawToWindowId        The ID of the Window to draw the Layer to,
+ * @property {String}  drawToWindowId      The ID of the Window to draw the Layer to,
  *                                         null indicates the Layer should draw to all Windows
+ *
+ * @property {Number}  renderQuality       The render quality/scale of the Layer's canvas
  *
  * @example
  * const Layer = {
@@ -61,6 +63,8 @@
  *   drawToWindowId: null,
  * };
  */
+
+import store from '@/store';
 
 /**
  * Generates a Layer Object
@@ -97,8 +101,24 @@ export default function Layer(layer) {
     drawToWindowId: null,
 
     resize({ width, height, dpr = window.devicePixelRatio }) {
-      this.canvas.width = width * dpr;
-      this.canvas.height = height * dpr;
+      const { _renderQuality: renderQuality } = this;
+
+      this.canvas.width = Math.round(width * renderQuality) * dpr;
+      this.canvas.height = Math.round(height * renderQuality) * dpr;
+    },
+
+    _renderQuality: 1,
+
+    get renderQuality() {
+      const { _renderQuality: renderQuality } = this;
+      return renderQuality;
+    },
+
+    set renderQuality(value) {
+      this._renderQuality = value; //eslint-disable-line
+
+      const { width, height } = store.state.size;
+      this.resize({ width, height });
     },
   };
 

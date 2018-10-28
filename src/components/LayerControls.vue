@@ -45,7 +45,7 @@
               </b-field>
             </div>
 
-            <div class="control-group output-group">
+            <div class="control-group window-group">
               <b-field label="Draw to window">
                 <b-select placeholder="Select a window" v-model="drawToWindowId">
                   <option value="-1" selected="selected">All windows</option>
@@ -54,6 +54,19 @@
                     :value="option"
                     :key="option">
                     {{ index }}
+                  </option>
+                </b-select>
+              </b-field>
+            </div>
+
+            <div class="control-group quality-group">
+              <b-field label="Render quality">
+                <b-select v-model="renderQuality">
+                  <option
+                    v-for="quality in qualities"
+                    :value="quality"
+                    :key="quality">
+                    {{ quality }}×
                   </option>
                 </b-select>
               </b-field>
@@ -78,6 +91,7 @@
         drawToOutputChecked: false,
         inheritanceIndex: -1,
         drawToWindowId: null,
+        qualities: [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
       };
     },
     computed: {
@@ -100,6 +114,18 @@
         }
 
         return this.layers[this.inheritanceIndex || 0].name;
+      },
+      renderQuality: {
+        get() {
+          return this.Layer.renderQuality;
+        },
+
+        set(value) {
+          this.$store.commit('layers/setRenderQuality', {
+            layerIndex: this.layerIndex,
+            renderQuality: value,
+          });
+        },
       },
     },
     methods: {

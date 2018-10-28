@@ -1,16 +1,16 @@
 import { modV } from '@/modv';
-import CCapture from 'ccapture.js';
+// import CCapture from 'ccapture.js';
 import store from '@/store';
 
-const capturer = new CCapture({
-  verbose: true,
-  framerate: 60,
-  // motionBlurFrames: 16,
-  quality: 10,
-  format: 'webm',
-});
+// const capturer = new CCapture({
+//   verbose: true,
+//   framerate: 60,
+//   // motionBlurFrames: 16,
+//   quality: 10,
+//   format: 'webm',
+// });
 
-window.capturer = capturer;
+// window.capturer = capturer;
 
 function mux() {
   return new Promise((resolve) => {
@@ -44,8 +44,8 @@ function mux() {
       if (layer.drawToWindowId) {
         const { context } = windows[windowIdLookup[layer.drawToWindowId]];
 
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(canvas, 0, 0, canvas.width, canvas.height);
+        context.clearRect(0, 0, width, height);
+        context.drawImage(canvas, 0, 0, width, height);
       }
     });
 
@@ -58,14 +58,14 @@ function mux() {
       }),
       );
 
-    capturer.capture(outputCanvas);
+    // capturer.capture(outputCanvas);
 
     windows.filter(windowController => layerWindowIds.indexOf(windowController.id) < 0)
       .forEach((windowController) => {
         const { canvas, context } = windowController;
 
         context.clearRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(outputCanvas, 0, 0, canvas.width, canvas.height);
+        context.drawImage(outputCanvas, 0, 0, width, height);
       });
   });
 }

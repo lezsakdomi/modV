@@ -11,8 +11,7 @@ function draw(δ) {
     const audioFeatures = store.getters['meyda/features'];
     const previewValues = store.getters['size/previewValues'];
 
-    const bufferCanvas = modV.bufferCanvas;
-    const bufferContext = modV.bufferContext;
+    const { bufferCanvas, bufferContext } = modV;
 
     if (!modV.meyda) return;
     const features = modV.meyda.get(audioFeatures);
@@ -28,12 +27,19 @@ function draw(δ) {
       const inheritFrom = Layer.inheritFrom;
       const pipeline = Layer.pipeline;
 
+      const { width, height } = canvas;
+
       if (pipeline && clearing) {
-        bufferContext.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
+        if ((bufferCanvas.width * bufferCanvas.height) !== (canvas.width * canvas.height)) {
+          bufferCanvas.width = canvas.width;
+          bufferCanvas.height = canvas.height;
+        } else {
+          bufferContext.clearRect(0, 0, width, height);
+        }
       }
 
       if (clearing) {
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.clearRect(0, 0, width, height);
       }
 
       if (inherit) {
@@ -49,10 +55,10 @@ function draw(δ) {
           lastCanvas = modV.layers[inheritFrom].canvas;
         }
 
-        context.drawImage(lastCanvas, 0, 0, lastCanvas.width, lastCanvas.height);
+        context.drawImage(lastCanvas, 0, 0, width, height);
 
         if (pipeline) {
-          bufferContext.drawImage(lastCanvas, 0, 0, lastCanvas.width, lastCanvas.height);
+          bufferContext.drawImage(lastCanvas, 0, 0, width, height);
         }
       }
 
@@ -73,13 +79,13 @@ function draw(δ) {
 
         if (Module.meta.type === '2d') {
           if (pipeline) {
-            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.clearRect(0, 0, width, height);
             context.drawImage(
               bufferCanvas,
               0,
               0,
-              canvas.width,
-              canvas.height,
+              width,
+              height,
             );
 
             render2d({
@@ -90,15 +96,16 @@ function draw(δ) {
               features,
               meyda: modV.meyda._m, //eslint-disable-line
               delta: δ,
+              kick: modV.kick,
             });
 
-            bufferContext.clearRect(0, 0, canvas.width, canvas.height);
+            bufferContext.clearRect(0, 0, width, height);
             bufferContext.drawImage(
               Layer.canvas,
               0,
               0,
-              canvas.width,
-              canvas.height,
+              width,
+              height,
             );
           } else {
             render2d({
@@ -109,19 +116,20 @@ function draw(δ) {
               features,
               meyda: modV.meyda._m, //eslint-disable-line
               delta: δ,
+              kick: modV.kick,
             });
           }
         }
 
         if (Module.meta.type === 'shader') {
           if (pipeline) {
-            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.clearRect(0, 0, width, height);
             context.drawImage(
               bufferCanvas,
               0,
               0,
-              canvas.width,
-              canvas.height,
+              width,
+              height,
             );
 
             renderShader({
@@ -135,13 +143,13 @@ function draw(δ) {
               pipeline,
             });
 
-            bufferContext.clearRect(0, 0, canvas.width, canvas.height);
+            bufferContext.clearRect(0, 0, width, height);
             bufferContext.drawImage(
               Layer.canvas,
               0,
               0,
-              canvas.width,
-              canvas.height,
+              width,
+              height,
             );
           } else {
             renderShader({
@@ -159,13 +167,13 @@ function draw(δ) {
 
         if (Module.meta.type === 'isf') {
           if (pipeline) {
-            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.clearRect(0, 0, width, height);
             context.drawImage(
               bufferCanvas,
               0,
               0,
-              canvas.width,
-              canvas.height,
+              width,
+              height,
             );
 
             renderIsf({
@@ -179,13 +187,13 @@ function draw(δ) {
               pipeline,
             });
 
-            bufferContext.clearRect(0, 0, canvas.width, canvas.height);
+            bufferContext.clearRect(0, 0, width, height);
             bufferContext.drawImage(
               Layer.canvas,
               0,
               0,
-              canvas.width,
-              canvas.height,
+              width,
+              height,
             );
           } else {
             renderIsf({
@@ -202,13 +210,13 @@ function draw(δ) {
         }
 
         if (pipeline) {
-          context.clearRect(0, 0, canvas.width, canvas.height);
+          context.clearRect(0, 0, width, height);
           context.drawImage(
             bufferCanvas,
             0,
             0,
-            canvas.width,
-            canvas.height,
+            modV.width,
+            modV.height,
           );
         }
       });
