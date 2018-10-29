@@ -1,9 +1,9 @@
 <template>
-  <div class="color-control" :data-moduleName="moduleName">
+  <div class="color-control">
     <label :for="inputId">
       {{ label }}
     </label>
-    <sketch-picker :id="inputId" v-model="value" ref="colorPicker" />
+    <sketch-picker :id="inputId" v-model="pickerValue" ref="colorPicker" />
   </div>
 </template>
 
@@ -15,6 +15,7 @@
     data() {
       return {
         pickerColors: {},
+        pickerValue: [0, 0, 0, 0],
       };
     },
     computed: {
@@ -37,8 +38,41 @@
       },
     },
     mounted() {
-      this.$refs.colorPicker.inputChange(this.value);
-      const data = this[this.options.returnFormat || 'rgbaArray'](this.$refs.colorPicker.val);
+      const { value } = this;
+
+      if (Array.isArray(this.value) && this.options.returnFormat === 'mappedRgbaArray') {
+        if (this.value.length < 4) {
+          this.pickerValue = {
+            r: Math.map(value[0], 0, 1.0, 0.0, 255),
+            g: Math.map(value[1], 0, 1.0, 0.0, 255),
+            b: Math.map(value[2], 0, 1.0, 0.0, 255),
+          };
+        } else {
+          this.pickerValue = {
+            r: Math.map(value[0], 0, 1.0, 0.0, 255),
+            g: Math.map(value[1], 0, 1.0, 0.0, 255),
+            b: Math.map(value[2], 0, 1.0, 0.0, 255),
+            a: Math.map(value[3], 0, 1.0, 0.0, 255),
+          };
+        }
+      } else if (Array.isArray(this.value)) {
+        if (this.value.length < 4) {
+          this.pickerValue = {
+            r: value[0],
+            g: value[1],
+            b: value[2],
+          };
+        } else {
+          this.pickerValue = {
+            r: value[0],
+            g: value[1],
+            b: value[2],
+            a: value[3],
+          };
+        }
+      }
+
+      const data = this[this.options.returnFormat || 'rgbaArray'](this.pickerValue);
 
       this.$store.dispatch('modVModules/updateProp', {
         name: this.moduleName,
@@ -126,6 +160,11 @@
     },
     components: {
       'sketch-picker': Sketch,
+    },
+    watch: {
+      pickerValue(value) {
+        this.value = value;
+      },
     },
   };
 </script>
