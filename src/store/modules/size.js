@@ -8,7 +8,8 @@ const state = {
   previewX: 0,
   previewY: 0,
   previewWidth: 0,
-  previewHeight: 0
+  previewHeight: 0,
+  reactToWindowResize: false
 }
 
 // getters
@@ -37,46 +38,67 @@ const actions = {
     let widthShadow = width
     let heightShadow = height
 
-    const largestWindowReference = store.getters[
-      'windows/largestWindowReference'
-    ]()
-    if (
-      widthShadow >= largestWindowReference.innerWidth &&
-      heightShadow >= largestWindowReference.innerHeight
-    ) {
-      if (store.getters['user/constrainToOneOne']) {
-        if (widthShadow > heightShadow) {
-          widthShadow = heightShadow
-        } else {
-          heightShadow = widthShadow
-        }
-      }
+    // const largestWindowReference = store.getters[
+    //   'windows/largestWindowReference'
+    // ]()
+    // if (
+    //   widthShadow >= largestWindowReference.innerWidth &&
+    //   heightShadow >= largestWindowReference.innerHeight
+    // ) {
+    //   if (store.getters['user/constrainToOneOne']) {
+    //     if (widthShadow > heightShadow) {
+    //       widthShadow = heightShadow
+    //     } else {
+    //       heightShadow = widthShadow
+    //     }
+    //   }
 
-      commit('setDimensions', { width: widthShadow, height: heightShadow })
+    //   commit('setDimensions', { width: widthShadow, height: heightShadow })
 
-      let dpr = window.devicePixelRatio || 1
-      if (!store.getters['user/useRetina']) dpr = 1
+    //   let dpr = window.devicePixelRatio || 1
+    //   if (!store.getters['user/useRetina']) dpr = 1
 
-      modV.resize(state.width, state.height, dpr)
-      store.dispatch('modVModules/resizeActive')
-      store.dispatch('layers/resize', {
-        width: state.width,
-        height: state.height,
-        dpr
-      })
-      store.dispatch('windows/resize', {
-        width: state.width,
-        height: state.height,
-        dpr
-      })
-      store.dispatch('size/calculatePreviewCanvasValues')
-    }
+    //   modV.resize(state.width, state.height, dpr)
+    //   store.dispatch('modVModules/resizeActive')
+    //   store.dispatch('layers/resize', {
+    //     width: state.width,
+    //     height: state.height,
+    //     dpr
+    //   })
+    //   store.dispatch('windows/resize', {
+    //     width: state.width,
+    //     height: state.height,
+    //     dpr
+    //   })
+    //   store.dispatch('size/calculatePreviewCanvasValues')
+    // }
+
+    commit('setDimensions', { width: widthShadow, height: heightShadow })
+
+    let dpr = window.devicePixelRatio || 1
+    if (!store.getters['user/useRetina']) dpr = 1
+
+    modV.resize(state.width, state.height, dpr)
+    store.dispatch('modVModules/resizeActive')
+    store.dispatch('layers/resize', {
+      width: state.width,
+      height: state.height,
+      dpr
+    })
+    store.dispatch('windows/resize', {
+      width: state.width,
+      height: state.height,
+      dpr
+    })
+    store.dispatch('size/calculatePreviewCanvasValues')
   },
+
   resizePreviewCanvas() {
     modV.previewCanvas.width = modV.previewCanvas.clientWidth
     modV.previewCanvas.height = modV.previewCanvas.clientHeight
     store.dispatch('size/calculatePreviewCanvasValues')
   },
+
   calculatePreviewCanvasValues({ commit, state }) {
     // thanks to http://ninolopezweb.com/2016/05/18/how-to-preserve-html5-canvas-aspect-ratio/
     // for great aspect ratio advice!
@@ -98,6 +120,10 @@ const actions = {
       width: newWidth,
       height: newHeight
     })
+  },
+
+  setReactToWindowResize({ commit }, value) {
+    commit('setReactToWindowResize', value)
   }
 }
 
@@ -106,18 +132,25 @@ const mutations = {
   setWidth(state, { width }) {
     Vue.set(state, 'width', width)
   },
+
   setHeight(state, { height }) {
     Vue.set(state, 'height', height)
   },
+
   setDimensions(state, { width, height }) {
     Vue.set(state, 'width', width)
     Vue.set(state, 'height', height)
   },
+
   setPreviewValues(state, { width, height, x, y }) {
     Vue.set(state, 'previewWidth', width)
     Vue.set(state, 'previewHeight', height)
     Vue.set(state, 'previewX', x)
     Vue.set(state, 'previewY', y)
+  },
+
+  setReactToWindowResize(state, value) {
+    state.reactToWindowResize = value
   }
 }
 

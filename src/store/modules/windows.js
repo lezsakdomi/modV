@@ -57,11 +57,13 @@ const mutations = {
     externalState.push(windowRef)
     getters.largestWindowReference()
   },
+
   removeWindow(state, { windowRef }) {
     state.windows.splice(windowRef, 1)
     externalState.splice(windowRef, 1)
     getters.largestWindowReference()
   },
+
   setSize(state, { width, height, dpr }) {
     state.size = {
       width,

@@ -55,16 +55,21 @@ class WindowController {
     windowRef.document.title = `modV Output (${number})`
     windowRef.document.body.style.margin = '0px'
     windowRef.document.body.style.backgroundColor = 'black'
-    windowRef.document.body.style.position = 'relative'
+    // windowRef.document.body.style.position = 'relative'
+    windowRef.document.body.style.display = 'flex'
+    windowRef.document.body.style.justifyContent = 'center'
+    windowRef.document.body.style.alignItems = 'center'
 
     this.canvas = document.createElement('canvas')
     this.context = this.canvas.getContext('2d')
 
     this.canvas.style.backgroundColor = 'transparent'
-    this.canvas.style.left = '50%'
-    this.canvas.style.position = 'absolute'
-    this.canvas.style.top = '50%'
-    this.canvas.style.transform = 'translate(-50%, -50%)'
+    // this.canvas.style.left = '50%'
+    // this.canvas.style.position = 'absolute'
+    // this.canvas.style.top = '50%'
+    // this.canvas.style.transform = 'translate(-50%, -50%)'
+    this.canvas.style.objectFit = 'cover'
+    this.canvas.style.width = '100%'
 
     this.canvas.addEventListener('dblclick', () => {
       if (!this.canvas.ownerDocument.webkitFullscreenElement) {
@@ -114,14 +119,14 @@ class WindowController {
       const dpr = resizeQueue.dpr
       const emit = resizeQueue.emit
 
-      if (emit) {
+      if (emit && store.state.size.reactToWindowResize) {
         store.dispatch('size/setDimensions', { width, height })
       }
 
       this.canvas.width = store.state.size.width || width * dpr
       this.canvas.height = store.state.size.height || height * dpr
-      this.canvas.style.width = `${store.state.size.width}px`
-      this.canvas.style.height = `${store.state.size.height}px`
+      // this.canvas.style.width = `${store.state.size.width}px`
+      // this.canvas.style.height = `${store.state.size.height}px`
 
       lastArea = 0
     }
