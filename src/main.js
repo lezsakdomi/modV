@@ -25,6 +25,7 @@ import slimUi from './extra/slim-ui'
 import shadertoy from './extra/shadertoy'
 import capture from './extra/capture'
 import splitter from './extra/jsconf-splitter'
+import CookieCutter from './extra/jsconf-x'
 import './assets/styles/index.scss'
 
 import attachResizeHandles from './extra/ui-resize/attach'
@@ -57,6 +58,7 @@ modV.use('plugin', slimUi)
 modV.use('plugin', shadertoy)
 modV.use('plugin', capture)
 modV.use('plugin', splitter)
+modV.use('plugin', CookieCutter)
 
 Object.values(builtInControls).forEach(value => modV.use('control', value))
 
