@@ -97,7 +97,8 @@ export default (window.modVVue = new Vue({
       'MattiasCRT-2.0',
       'Doughnut_Generator',
       'Media',
-      '3D'
+      '3D',
+      'Equirectangular'
     ]
 
     modules.forEach(fileName => {

@@ -51,11 +51,15 @@ const actions = {
     commit('removePalette', { id })
   },
   updateBpm({}, { bpm }) { //eslint-disable-line
-    Object.keys(state.palettes).forEach(id => {
+    const palettesKeys = Object.keys(state.palettes)
+    const palettesKeysLength = palettesKeys.length
+
+    for (let i = 0; i < palettesKeysLength; ++i) {
+      const id = palettesKeys[i]
       modV.workers.palette.setPalette(id, {
         bpm
       })
-    })
+    }
   },
   updateColors({ commit }, { id, colors }) {
     modV.workers.palette.setPalette(id, {
@@ -99,12 +103,16 @@ const actions = {
   presetData({ state }, modulesToGet) {
     const data = {}
 
-    Object.keys(state.palettes).forEach(key => {
+    const palettesKeys = Object.keys(state.palettes)
+    const palettesKeysLength = palettesKeys.length
+
+    for (let i = 0; i < palettesKeysLength; ++i) {
+      const key = palettesKeys[i]
       const paletteData = state.palettes[key]
       if (modulesToGet.includes(paletteData.moduleName)) {
         data[key] = paletteData
       }
-    })
+    }
 
     return data
   },

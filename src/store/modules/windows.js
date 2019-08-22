@@ -40,9 +40,12 @@ const actions = {
     commit('removeWindow', { windowRef })
   },
   resize({ state, commit }, { width, height, dpr }) {
-    state.windows.forEach(windowController => {
+    const windowsLength = state.windows.length
+
+    for (let i = 0; i < windowsLength; ++i) {
+      const windowController = state.windows[i]
       windowController.resize(width, height, dpr, false)
-    })
+    }
 
     commit('setSize', { width, height, dpr })
   }
