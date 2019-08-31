@@ -44,7 +44,7 @@ function buildNwjs() {
   // globby([]).then((paths) => {
     var nwb = new NwBuilder({
       files: __dirname + '/../dist/**/**',
-      platforms: ['osx64', 'win64'],
+      platforms: ['osx64', 'win64', 'linux64'],
       //flavor: 'normal',
       flavor: 'sdk',
       cacheDir: path.resolve(__dirname, '..', 'nwjs', 'cache'),
