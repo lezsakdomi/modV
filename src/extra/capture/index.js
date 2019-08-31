@@ -1,5 +1,7 @@
-import CCapture from 'ccapture.js'
+import 'ccapture.js'
 import controlPanelComponent from './ControlPanel'
+
+const CCapture = window.CCapture
 
 const capture = {
   name: 'Capture',

@@ -21,7 +21,7 @@
     "axios": "^0.18.0",
     "buefy": "^0.6.7",
     "canvas-autoscale": "^2.0.0",
-    "ccapture.js": "^1.0.7",
+    "ccapture.js": "aceslowman/ccapture.js#npm-fix",
     "correcting-interval": "^2.0.0",
     "hsy-vue-dropdown": "0.0.5",
     "lfo-for-modv": "0.0.1",
